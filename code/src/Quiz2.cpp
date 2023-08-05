@@ -499,6 +499,7 @@ int main(int argc, char* argv[])
     GLuint nTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\grass.jpg");
     GLuint metalicTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\metal.jpg");
     GLuint tatooTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\tatoo.jpg");
+    GLuint ropeTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\rope.jpg");
 
     // Load shaders
     string shaderPathPrefix = "G:\\My Documents\\COMP371\\code\\assets\\shaders\\";
@@ -1142,7 +1143,7 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+        glBindTexture(GL_TEXTURE_2D, ropeTextureID);
         // Now draw the net
         mat4 net = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         net = net * translate(mat4(1.0f), vec3(0.0f, 4.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.4f, 0.4f, 38.5f));
@@ -1150,6 +1151,7 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
         for (int i = 0; i < 39; ++i)
         {
             // Draw vertical lines for the net
