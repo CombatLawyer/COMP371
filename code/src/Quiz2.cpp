@@ -491,17 +491,17 @@ int main(int argc, char* argv[])
     glClearColor(0.184f, 0.310f, 0.310f, 1.0f);
 
     // Load Textures
-    GLuint glossTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\gloss.jpg");
-    GLuint whiteTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\white.jpg");
-    GLuint lTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\water.jpg");
-    GLuint iTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\fire.jpg");
-    GLuint aTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\lightning.jpg");
-    GLuint nTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\grass.jpg");
-    GLuint metalicTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\metal.jpg");
-    GLuint tatooTextureID = loadTexture("G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\tatoo.jpg");
+    GLuint glossTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\gloss.jpg");
+    GLuint whiteTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\white.jpg");
+    GLuint lTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\water.jpg");
+    GLuint iTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\fire.jpg");
+    GLuint aTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\lightning.jpg");
+    GLuint nTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\grass.jpg");
+    GLuint metalicTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\metal.jpg");
+    GLuint tatooTextureID = loadTexture("G:\\My Documents\\COMP371\\code\\assets\\textures\\tatoo.jpg");
 
     // Load shaders
-    string shaderPathPrefix = "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\shaders\\";
+    string shaderPathPrefix = "G:\\My Documents\\COMP371\\code\\assets\\shaders\\";
     GLuint shaderScene = loadSHADER(shaderPathPrefix + "scene_vertex.glsl", shaderPathPrefix + "scene_fragment.glsl");
     GLuint shaderShadow = loadSHADER(shaderPathPrefix + "shadow_vertex.glsl", shaderPathPrefix + "shadow_fragment.glsl");
     GLuint shaderSkybox = loadSHADER(shaderPathPrefix + "skybox_vertex.glsl", shaderPathPrefix + "skybox_fragment.glsl");
@@ -569,12 +569,12 @@ int main(int argc, char* argv[])
 
     vector<string> faces
     {
-        "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\right.jpg",
-        "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\left.jpg",
-        "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\top.jpg",
-        "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\bottom.jpg",
-        "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\front.jpg",
-        "G:\\My Documents\\Quiz1\\Lab03\\code\\assets\\textures\\back.jpg"
+        "G:\\My Documents\\COMP371\\code\\assets\\textures\\right.jpg",
+        "G:\\My Documents\\COMP371\\code\\assets\\textures\\left.jpg",
+        "G:\\My Documents\\COMP371\\code\\assets\\textures\\top.jpg",
+        "G:\\My Documents\\COMP371\\code\\assets\\textures\\bottom.jpg",
+        "G:\\My Documents\\COMP371\\code\\assets\\textures\\front.jpg",
+        "G:\\My Documents\\COMP371\\code\\assets\\textures\\back.jpg"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
