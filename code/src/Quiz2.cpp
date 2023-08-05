@@ -506,19 +506,20 @@ int main(int argc, char* argv[])
     GLuint shaderShadow = loadSHADER(shaderPathPrefix + "shadow_vertex.glsl", shaderPathPrefix + "shadow_fragment.glsl");
     GLuint shaderSkybox = loadSHADER(shaderPathPrefix + "skybox_vertex.glsl", shaderPathPrefix + "skybox_fragment.glsl");
 
-    GLuint textureFlag = glGetUniformLocation(shaderScene, "useTexture");
+    // Used to trigger specific flags in the scene shader
+    GLuint textureFlag = glGetUniformLocation(shaderScene, "useTexture"); // Determines if textures need to be turned on
     GLint p_textureArray[1]{};
     GLint* currentTextureValue = p_textureArray;
 
-    GLuint shadowFlag = glGetUniformLocation(shaderScene, "useShadow");
+    GLuint shadowFlag = glGetUniformLocation(shaderScene, "useShadow"); // Determines if shadows need to be turned on
     GLint p_shadowArray[1]{};
     GLint* currentShadowValue = p_shadowArray;
 
-    GLuint zSpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightZ");
+    GLuint zSpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightZ"); // Determines if the spotlight infront of the model is turned on
     GLint p_zSpotlightArray[1]{};
     GLint* currentZSpotlightValue = p_zSpotlightArray;
 
-    GLuint ySpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightY");
+    GLuint ySpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightY"); // Determines if the spotlight fixed above on the y axis is turned on
     GLint p_ySpotlightArray[1]{};
     GLint* currentYSpotlightValue = p_ySpotlightArray;
 
@@ -567,6 +568,7 @@ int main(int argc, char* argv[])
     glDrawBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // Skybox textures
     vector<string> faces
     {
         "G:\\My Documents\\COMP371\\code\\assets\\textures\\right.jpg",
@@ -593,8 +595,10 @@ int main(int argc, char* argv[])
     float cameraHorizontalAngle = 90.0f;
     float cameraVerticalAngle = 0.0f;
 
+    // Used to modify the FOV for zooming in or out
     float FOV = 70.0f;
 
+    // Used to keep track of moving the camera lookat at a specific position
     vec3 viewChange = vec3(0.0f, 0.0f, 0.0f);
 
     // Set initial view matrix
@@ -608,17 +612,17 @@ int main(int argc, char* argv[])
 
     // light parameters
     vec3 lightPosition = vec3(0.0f, 30.0f, 0.0f); // the location of the point light in 3D space
-    vec3 pointLightFocus(0.0, 0.0f, -1.0f);
-
+    vec3 pointLightFocus(0.0, 0.0f, -1.0f); // The location the light is "looking" at
     float lightNearPlane = 1.0f;
     float lightFarPlane = 100.0f;
 
     // Set light color on scene shader
-    SetUniformVec3(shaderScene, "light_color", vec3(1.0, 1.0, 1.0));
+    SetUniformVec3(shaderScene, "light_color", vec3(0.0f, 0.0f, 0.0f));
 
     // Define and upload geometry to the GPU here ...
     int vao = createTexturedCubeVertexArrayObject();
 
+    // Prepare the skybox vertex array object
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
@@ -652,10 +656,35 @@ int main(int argc, char* argv[])
     // Default rendering mode
     GLenum renderMode = GL_TRIANGLES;
 
+    // Initilize variables to allow holding the button to not spam the button
     int previousXstate = GLFW_RELEASE;
     int previousBstate = GLFW_RELEASE;
     int previousLstate = GLFW_RELEASE;
     int previousKstate = GLFW_RELEASE;
+    int previousJstate = GLFW_RELEASE;
+
+    // Initilize variables tied to the spotlight rotation
+    bool rotateSpotlight = false;
+    double timing = 0;
+    float xdir = 1.0f;
+    float ydir = 1.0f;
+    float zdir = 1.0f;
+    vec3 zLightFocus(0.0, 0.0f, -1.0f);      // the point in 3D space the light "looks" at
+
+    // Randomize the initial direction the spotlight will move in
+    srand(time(0));
+    if ((rand() % 2 == 0))
+    {
+        xdir *= -1.0f;
+    }
+    if ((rand() % 2 == 0))
+    {
+        ydir *= -1.0f;
+    }
+    if ((rand() % 2 == 0))
+    {
+        zdir *= -1.0f;
+    }
 
     // Player poisition reference and initial positions
     vec3* playerPosition = NULL;
@@ -694,17 +723,60 @@ int main(int argc, char* argv[])
         circleLookAt = circleFocus - circleCamera;
 
         vec3 zLightPosition = vec3(0.0f, 5.0f, 30.0f); // the location of the light in 3D space
-        vec3 zLightFocus(0.0, 0.0f, -1.0f);      // the point in 3D space the light "looks" at
+
+        // Spotlight rotation container
+        timing += dt;
+        if (rotateSpotlight)
+        {
+            // Every 5 seconds this should trigger and rerandomize the direction the light is moving in
+            srand(time(0));
+            if (timing > 5) 
+            { 
+                if ((rand() % 2 == 0))
+                {
+                    xdir *= -1.0f;
+                }
+                if ((rand() % 2 == 0))
+                {
+                    ydir *= -1.0f;
+                }
+                if ((rand() % 2 == 0))
+                {
+                    zdir *= -1.0f;
+                }
+                timing = 0;
+            }
+            
+            // If the spotlight focuses on something off the model, return it back into the right spot
+            if ((zLightFocus.x < -36.0f) | (zLightFocus.x > 36.0f))
+            {
+                xdir *= -1.0f;
+            }
+            if ((zLightFocus.y < -1.0f) | (zLightFocus.y > 5.0f))
+            {
+                ydir *= -1.0f;
+            }
+            if ((zLightFocus.z < -18.0f) | (zLightFocus.z > 18.0f))
+            {
+                zdir *= -1.0f;
+            }
+
+            // This is the actual movement of the focus of the spotlight
+            zLightFocus.x += xdir * dt * 2.0f;
+            zLightFocus.y += ydir * dt * 2.0f;
+            zLightFocus.z += zdir * dt * 2.0f;
+        }
+
         vec3 zLightDirection = normalize(zLightFocus - zLightPosition);
         vec3 zSpotlightColor = vec3(1.0f, 1.0f, 1.0f);
         SetUniformVec3(shaderScene, "zSpotLight_pos", zLightPosition);
         SetUniformVec3(shaderScene, "zSpotLight_dir", zLightDirection);
         SetUniformVec3(shaderScene, "zSpotLight_color", zSpotlightColor);
 
-        vec3 yLightPosition = circleCamera; // the location of the light in 3D space
-        vec3 yLightFocus = circleLookAt;      // the point in 3D space the light "looks" at
+        vec3 yLightPosition = circleCamera; // the location of the y spotlight in 3D space
+        vec3 yLightFocus = circleLookAt;      // the point in 3D space the spotlight "looks" at
         vec3 yLightDirection = normalize(zLightFocus - yLightPosition);
-        vec3 ySpotlightColor = vec3(1.0f, 0.0f, 0.0f);
+        vec3 ySpotlightColor = vec3(1.0f, 0.0f, 0.0f); // Set the color of the spotlight to something different
         SetUniformVec3(shaderScene, "ySpotLight_pos", yLightPosition);
         SetUniformVec3(shaderScene, "ySpotLight_dir", yLightDirection);
         SetUniformVec3(shaderScene, "ySpotLight_color", ySpotlightColor);
@@ -712,10 +784,10 @@ int main(int argc, char* argv[])
         // Set light space matrix on both shaders
         SetUniformMat4(shaderShadow, "light_view_proj_matrix", lightSpaceMatrix);
         SetUniformMat4(shaderScene, "light_view_proj_matrix", lightSpaceMatrix);
-        float lightAngleOuter = 30.0f;
-        float lightAngleInner = 10.0f;
  
         // Set light cutoff angles on scene shader
+        float lightAngleOuter = 30.0f;
+        float lightAngleInner = 10.0f;
         SetUniformfValue(shaderScene, "light_cutoff_inner", cos(radians(lightAngleInner)));
         SetUniformfValue(shaderScene, "light_cutoff_outer", cos(radians(lightAngleOuter)));
 
@@ -862,7 +934,10 @@ int main(int argc, char* argv[])
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
 
+            // Draw the racket where player 1 is
             Racket playerOne = Racket(worldXAngle, worldYAngle, playerOneLoc, shaderShadow, renderMode, 1, armAngles[0][0], armAngles[0][1], armAngles[0][2], armAngles[0][3], tatooTextureID, metalicTextureID, false);
+
+            // Draw the letter l, bound to player 1 position
             mat4 lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
             lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.0f));
             lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
@@ -875,13 +950,17 @@ int main(int argc, char* argv[])
             SetUniformMat4(shaderShadow, "world_matrix", lCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
+            // Draw the letter i, bound to player 1 position
             mat4 iCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
             iCharacter = iCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
             iCharacter = rotate(iCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", iCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
+            // Draw the racket where player 2 is
             Racket playerTwo = Racket(worldXAngle, worldYAngle, playerTwoLoc, shaderShadow, renderMode, 2, armAngles[1][0], armAngles[1][1], armAngles[1][2], armAngles[1][3], tatooTextureID, metalicTextureID, false);
+
+            // Draw the letter a, bound to player 2 position
             mat4 aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
             aCharacter = aCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.25f * cos(radians(armAngles[1][1] + 90.0f))));
             aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
@@ -906,6 +985,7 @@ int main(int argc, char* argv[])
             SetUniformMat4(shaderShadow, "world_matrix", aCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
+            // Draw the letter n, bound to player 2 position
             mat4 nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
             nCharacter = nCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.25f * cos(radians(armAngles[1][1] + 90.0f))));
             nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
@@ -1042,8 +1122,8 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glBindTexture(GL_TEXTURE_2D, glossTextureID);
         // Drawing the net, first the posts
+        glBindTexture(GL_TEXTURE_2D, glossTextureID);
         mat4 netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, -19.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
@@ -1096,10 +1176,14 @@ int main(int argc, char* argv[])
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        // Draw the two rackets at the specific spots the players should be
         Racket playerOne = Racket(worldXAngle, worldYAngle, playerOneLoc, shaderScene, renderMode, 1, armAngles[0][0], armAngles[0][1], armAngles[0][2], armAngles[0][3], tatooTextureID, metalicTextureID, true);
         Racket playerTwo = Racket(worldXAngle, worldYAngle, playerTwoLoc, shaderScene, renderMode, 2, armAngles[1][0], armAngles[1][1], armAngles[1][2], armAngles[1][3], tatooTextureID, metalicTextureID, true);
         
+        // Change transparency
         SetUniformfValue(shaderScene, "transparency", 0.4f);
+
+        // Draw the letter l, bound to player 1 position
         mat4 lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         glBindTexture(GL_TEXTURE_2D, lTextureID);
         lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
@@ -1117,6 +1201,7 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        // Draw the letter i, bound to player 1 position
         glBindTexture(GL_TEXTURE_2D, iTextureID);
         mat4 iCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         iCharacter = iCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
@@ -1126,6 +1211,7 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        // Draw the letter a, bound to player 2 position
         glBindTexture(GL_TEXTURE_2D, aTextureID);
         mat4 aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, -0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.2f * cos(radians(armAngles[1][1] + 90.0f))));
@@ -1155,6 +1241,7 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        // Draw the letter n, bound to player 2 position
         glBindTexture(GL_TEXTURE_2D, nTextureID);
         mat4 nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, 0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.2f * cos(radians(armAngles[1][1] + 90.0f))));
@@ -1178,11 +1265,16 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        // Retrun the transparency to 0
         SetUniformfValue(shaderScene, "transparency", 1.0f);
 
+        // This is to help view where the spotlight is actually moving
+        /*SetUniformMat4(shaderScene, "world_matrix", translate(mat4(1.0f), zLightFocus));
+        glDrawArrays(GL_TRIANGLES, 0, 36);*/
+
+        //begin drawing the skybox
         GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
         glUniform1i(skyboxTextures, 1);
-
         glDepthFunc(GL_LEQUAL);
         glUseProgram(shaderSkybox);
         // set view and projection matrix
@@ -1405,6 +1497,16 @@ int main(int argc, char* argv[])
             }
         }
         previousKstate = glfwGetKey(window, GLFW_KEY_K);
+
+        if (previousJstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) // J - activate spotlight movement
+        {
+            rotateSpotlight = !rotateSpotlight;
+            if (rotateSpotlight) 
+            {
+                zLightFocus = vec3(0.0, 0.0f, -1.0f);      // reinitiate where the spotlight starts
+            }
+        }
+        previousJstate = glfwGetKey(window, GLFW_KEY_J);
 
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) // 1 - Set player 1 as the current player
         {
