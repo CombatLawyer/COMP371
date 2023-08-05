@@ -614,10 +614,10 @@ int main(int argc, char* argv[])
     vec3 lightPosition = vec3(0.0f, 30.0f, 0.0f); // the location of the point light in 3D space
     vec3 pointLightFocus(0.0, 0.0f, -1.0f); // The location the light is "looking" at
     float lightNearPlane = 1.0f;
-    float lightFarPlane = 100.0f;
+    float lightFarPlane = 120.0f;
 
     // Set light color on scene shader
-    SetUniformVec3(shaderScene, "light_color", vec3(0.0f, 0.0f, 0.0f));
+    SetUniformVec3(shaderScene, "light_color", vec3(1.0f, 1.0f, 1.0f));
 
     // Define and upload geometry to the GPU here ...
     int vao = createTexturedCubeVertexArrayObject();
@@ -775,8 +775,8 @@ int main(int argc, char* argv[])
 
         vec3 yLightPosition = circleCamera; // the location of the y spotlight in 3D space
         vec3 yLightFocus = circleLookAt;      // the point in 3D space the spotlight "looks" at
-        vec3 yLightDirection = normalize(zLightFocus - yLightPosition);
-        vec3 ySpotlightColor = vec3(1.0f, 0.0f, 0.0f); // Set the color of the spotlight to something different
+        vec3 yLightDirection = normalize(yLightFocus - yLightPosition);
+        vec3 ySpotlightColor = vec3(1.0f, 1.0f, 0.0f); // Set the color of the spotlight to something different
         SetUniformVec3(shaderScene, "ySpotLight_pos", yLightPosition);
         SetUniformVec3(shaderScene, "ySpotLight_dir", yLightDirection);
         SetUniformVec3(shaderScene, "ySpotLight_color", ySpotlightColor);

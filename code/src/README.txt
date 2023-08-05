@@ -8,8 +8,9 @@ Up arrow - Change camera postion to y spotlight
 Right arrow - Rotate y spotlight counterclockwise
 X - toggle textures
 B - toggle shadow
-L - toggle zspotlight
-K - toggle yspotlight
+L - toggle z spotlight
+K - toggle y spotlight
+J - toggle z spotlight rotation
 P - change model rendering to using points
 O - change model rendering to using lines
 I - change model rendering to use triangles
