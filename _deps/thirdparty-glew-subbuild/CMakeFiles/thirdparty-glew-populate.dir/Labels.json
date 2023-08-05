@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/thirdparty-glew-populate"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/369cf0dbb6c562c7727fc4b560dc1910/thirdparty-glew-populate.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/d126f1deee1a1ea3fed7f38360bbb2b4/thirdparty-glew-populate-complete.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-install.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-mkdir.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-download.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-patch.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-configure.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-build.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-test.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glew-subbuild/CMakeFiles/cd5e647122e4d36c92ab2708d2af0618/thirdparty-glew-populate-skip-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"thirdparty-glew-populate"
+		],
+		"name" : "thirdparty-glew-populate"
+	}
+}

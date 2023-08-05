@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/thirdparty-glm-populate"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/18004344b57618e677513697eee1e38e/thirdparty-glm-populate.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/737c3c5fa71c0d92d1455567e6c9b601/thirdparty-glm-populate-complete.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-install.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-mkdir.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-download.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-patch.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-configure.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-build.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-test.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/_deps/thirdparty-glm-subbuild/CMakeFiles/4b8af7fa9f97ea27a99041e7e94c5927/thirdparty-glm-populate-skip-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"thirdparty-glm-populate"
+		],
+		"name" : "thirdparty-glm-populate"
+	}
+}

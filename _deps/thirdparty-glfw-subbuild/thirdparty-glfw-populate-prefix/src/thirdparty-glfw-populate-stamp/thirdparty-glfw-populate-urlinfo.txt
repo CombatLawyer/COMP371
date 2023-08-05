@@ -1,0 +1,3 @@
+repository='external project URL'
+module='G:/My Documents/COMP371/code/thirdparty/glfw-3.3.2.zip'
+tag=''

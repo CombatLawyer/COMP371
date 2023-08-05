@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="G:\My Documents\COMP371\CMakeFiles\bd7d5d063319f12f570006454e4d4aec\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glew-src\build\cmake\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="G:\My Documents\COMP371\_deps\thirdparty-glew-build\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{A2514C00-44B7-3CEA-A66E-08AF9328D58A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

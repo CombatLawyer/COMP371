@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/CMakeFiles/thirdparty-glm-populate"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/CMakeFiles/thirdparty-glm-populate.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/CMakeFiles/thirdparty-glm-populate-complete.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-install.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-mkdir.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-download.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-patch.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-configure.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-build.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-test.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glm-subbuild/thirdparty-glm-populate-prefix/src/thirdparty-glm-populate-stamp/thirdparty-glm-populate-skip-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"thirdparty-glm-populate"
+		],
+		"name" : "thirdparty-glm-populate"
+	}
+}

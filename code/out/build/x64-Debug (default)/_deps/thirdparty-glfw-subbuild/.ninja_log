@@ -1,0 +1,11 @@
+# ninja log v5
+6	545	712954869	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-mkdir	6df8816116408cd9
+545	3826	712954872	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-download	8e064b0a0915c446
+3826	3970	712954872	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-skip-update	611bb04416e8b7c6
+3970	4109	712954872	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-patch	e8add8dbf4c19fd0
+4111	4263	712954872	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-configure	bdacfb37958a4e07
+4263	4413	712954872	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-build	d1297f22ae52bafc
+4413	4553	712954873	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-install	88821630de203adc
+4554	4695	712954873	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-test	c1371376c09e8908
+4696	4908	712954873	CMakeFiles/thirdparty-glfw-populate-complete	5019faafeda0894f
+4696	4908	712954873	thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-done	5019faafeda0894f

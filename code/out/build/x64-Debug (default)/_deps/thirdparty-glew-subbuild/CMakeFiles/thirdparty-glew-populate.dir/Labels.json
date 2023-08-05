@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/CMakeFiles/thirdparty-glew-populate"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/CMakeFiles/thirdparty-glew-populate.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/CMakeFiles/thirdparty-glew-populate-complete.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-install.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-mkdir.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-download.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-patch.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-configure.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-build.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-test.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glew-subbuild/thirdparty-glew-populate-prefix/src/thirdparty-glew-populate-stamp/thirdparty-glew-populate-skip-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"thirdparty-glew-populate"
+		],
+		"name" : "thirdparty-glew-populate"
+	}
+}

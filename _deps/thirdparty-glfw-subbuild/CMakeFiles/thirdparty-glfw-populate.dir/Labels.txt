@@ -1,0 +1,14 @@
+# Target labels
+ thirdparty-glfw-populate
+# Source files and their labels
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/5ab93737ffe19274ab20f8a9eebee9a4/thirdparty-glfw-populate.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/3220bde2b968ffe555635a9b4d536d09/thirdparty-glfw-populate-complete.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-install.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-mkdir.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-download.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-patch.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-configure.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-build.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-test.rule
+G:/My Documents/COMP371/_deps/thirdparty-glfw-subbuild/CMakeFiles/e5698776641f3dfec726d12dcc01ba96/thirdparty-glfw-populate-skip-update.rule

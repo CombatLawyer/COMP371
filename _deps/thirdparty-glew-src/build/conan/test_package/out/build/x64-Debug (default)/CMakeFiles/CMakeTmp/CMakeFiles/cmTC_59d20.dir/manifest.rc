@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "G:/My Documents/COMP371/_deps/thirdparty-glew-src/build/conan/test_package/out/build/x64-Debug (default)/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_59d20.dir/embed.manifest"

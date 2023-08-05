@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-skip-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\4b8af7fa9f97ea27a99041e7e94c5927\thirdparty-glm-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\737c3c5fa71c0d92d1455567e6c9b601\thirdparty-glm-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\18004344b57618e677513697eee1e38e\thirdparty-glm-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="G:\My Documents\COMP371\_deps\thirdparty-glm-subbuild\CMakeFiles\thirdparty-glm-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{AC019DAE-58ED-3B02-9CFB-172488223FCF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

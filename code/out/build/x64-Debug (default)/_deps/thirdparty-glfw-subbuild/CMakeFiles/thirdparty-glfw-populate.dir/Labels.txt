@@ -1,0 +1,14 @@
+# Target labels
+ thirdparty-glfw-populate
+# Source files and their labels
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate-complete.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-install.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-mkdir.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-download.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-patch.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-configure.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-build.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-test.rule
+G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-skip-update.rule

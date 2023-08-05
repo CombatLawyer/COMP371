@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/CMakeFiles/thirdparty-glfw-populate-complete.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-install.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-mkdir.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-download.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-patch.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-configure.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-build.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-test.rule"
+		},
+		{
+			"file" : "G:/My Documents/COMP371/code/out/build/x64-Debug (default)/_deps/thirdparty-glfw-subbuild/thirdparty-glfw-populate-prefix/src/thirdparty-glfw-populate-stamp/thirdparty-glfw-populate-skip-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"thirdparty-glfw-populate"
+		],
+		"name" : "thirdparty-glfw-populate"
+	}
+}
