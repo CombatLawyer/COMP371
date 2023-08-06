@@ -41,7 +41,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>G:\My Documents\COMP371\code\include;G:\My Documents\COMP371\_deps\thirdparty-glew-src\include;G:\My Documents\COMP371\_deps\thirdparty-glfw-src\include;G:\My Documents\COMP371\_deps\thirdparty-glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../COMP371/code/include;../COMP371/_deps/thirdparty-glew-src/include;../COMP371/_deps/thirdparty-glfw-src/include;../COMP371/_deps/thirdparty-glm-src/glm/..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -70,7 +70,7 @@
     </Midl>
     <Link>
       <AdditionalDependencies>opengl32.lib;lib\Debug\libglew32d.lib;_deps\thirdparty-glfw-build\src\Debug\glfw3.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../COMP371/code/include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../COMP371/code/assets;../COMP371/code/include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
