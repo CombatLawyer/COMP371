@@ -20,8 +20,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <G:\My Documents\COMP371\code\include\stb_image.h>
-#include <G:\My Documents\COMP371\code\include\shaderloader.h>
+#include <stb_image.h>
+#include <shaderloader.h>
 
 using namespace glm;
 using namespace std;
