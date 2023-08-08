@@ -142,6 +142,109 @@ int createTexturedCubeVertexArrayObject()
     return vertexBufferObject;
 }
 
+int createSphereObject()
+{
+    // A vertex is a point on a polygon, it contains positions and other data (eg: colors)
+    unsigned int sphereVAO;
+    glGenVertexArrays(1, &sphereVAO);
+
+    unsigned int vbo, ebo;
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    vector<vec3> positions;
+    vector<vec2> uv;
+    vector<vec3> normals;
+    vector<unsigned int> indices;
+    vector<vec3> colors;
+
+    const unsigned int X_SEGMENTS = 64;
+    const unsigned int Y_SEGMENTS = 64;
+    const float PI = 3.14159265359;
+    for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
+    {
+        for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+        {
+            float xSegment = (float)x / (float)X_SEGMENTS;
+            float ySegment = (float)y / (float)Y_SEGMENTS;
+            float xPos = cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+            float yPos = cos(ySegment * PI);
+            float zPos = sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+
+            positions.push_back(vec3(xPos, yPos, zPos));
+            colors.push_back(vec3(1.0f, 0.0f, 0.0f));
+            uv.push_back(vec2(xSegment, ySegment));
+            normals.push_back(vec3(xPos, yPos, zPos));
+        }
+    }
+
+    bool oddRow = false;
+    for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+    {
+        if (!oddRow) // even rows: y == 0, y == 2; and so on
+        {
+            for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+            {
+                indices.push_back(y * (X_SEGMENTS + 1) + x);
+                indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+            }
+        }
+        else
+        {
+            for (int x = X_SEGMENTS; x >= 0; --x)
+            {
+                indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+                indices.push_back(y * (X_SEGMENTS + 1) + x);
+            }
+        }
+        oddRow = !oddRow;
+    }
+    indexCount = indices.size();
+
+    vector<float> data;
+    for (unsigned int i = 0; i < positions.size(); ++i)
+    {
+        data.push_back(positions[i].x);
+        data.push_back(positions[i].y);
+        data.push_back(positions[i].z);
+        if (colors.size() > 0) {
+            data.push_back(colors[i].x);
+            data.push_back(colors[i].y);
+            data.push_back(colors[i].z);
+        }
+        if (uv.size() > 0)
+        {
+            data.push_back(uv[i].x);
+            data.push_back(uv[i].y);
+        }
+        if (normals.size() > 0)
+        {
+            data.push_back(normals[i].x);
+            data.push_back(normals[i].y);
+            data.push_back(normals[i].z);
+        }
+    }
+    glBindVertexArray(sphereVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    float stride = (3 + 2 + 3 + 3) * sizeof(float);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(8 * sizeof(float)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // VAO already stored the state we just defined, safe to unbind buffer
+    glBindVertexArray(0); // Unbind to not modify the VAO
+
+    return sphereVAO;
+}
+
 float skyboxVertices[] = {
     // positions          
     -100.0f,  100.0f, -100.0f,
@@ -459,6 +562,18 @@ GLuint loadTexture(const char* filename)
     return textureId;
 }
 
+bool CheckCollision(vec3 ballPosition, vec3 racketPosition)
+{
+    // get difference vector between both centers
+    vec3 difference = ballPosition - racketPosition;
+    vec3 clamped = clamp(difference, vec3(-0.1f, -0.9f, -0.6f), vec3(0.1f, 0.9f, 0.6f));
+    // add clamped value to center of racket to find the position closest to the ball
+    vec3 closest = racketPosition + clamped;
+    // retrieve vector between center circle and closest point AABB and check if length <= radius
+    difference = closest - ballPosition;
+    return length(difference) < 0.5f;
+}
+
 int main(int argc, char* argv[])
 {
     // Initialize GLFW and OpenGL version
@@ -500,6 +615,7 @@ int main(int argc, char* argv[])
     GLuint metalicTextureID = loadTexture("code/assets/textures/metal.jpg");
     GLuint tatooTextureID = loadTexture("code/assets/textures/tatoo.jpg");
     GLuint ropeTextureID = loadTexture("code/assets/textures/rope.jpg");
+    GLuint tennisBallTextureID = loadTexture("code/assets/textures/tennisball.jpg");
 
     // Load shaders
     string shaderPathPrefix = "code/assets/shaders/";
@@ -572,12 +688,12 @@ int main(int argc, char* argv[])
     // Skybox textures
     vector<string> faces
     {
-        "code/assets/textures/right.jpg",
-        "code/assets/textures/left.jpg",
-        "code/assets/textures/top.jpg",
-        "code/assets/textures/bottom.jpg",
-        "code/assets/textures/front.jpg",
-        "code/assets/textures/back.jpg"
+        "code/assets/textures/spaceright.jpg",
+        "code/assets/textures/spaceleft.jpg",
+        "code/assets/textures/spacetop.jpg",
+        "code/assets/textures/spacebottom.jpg",
+        "code/assets/textures/spacefront.jpg",
+        "code/assets/textures/spaceback.jpg"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
@@ -597,7 +713,7 @@ int main(int argc, char* argv[])
     float cameraVerticalAngle = 0.0f;
 
     // Used to modify the FOV for zooming in or out
-    float FOV = 70.0f;
+    float FOV = 70.6f;
 
     // Used to keep track of moving the camera lookat at a specific position
     vec3 viewChange = vec3(0.0f, 0.0f, 0.0f);
@@ -622,6 +738,7 @@ int main(int argc, char* argv[])
 
     // Define and upload geometry to the GPU here ...
     int vao = createTexturedCubeVertexArrayObject();
+    int sphereVAO = createSphereObject();
 
     // Prepare the skybox vertex array object
     unsigned int skyboxVAO, skyboxVBO;
@@ -640,7 +757,6 @@ int main(int argc, char* argv[])
     glfwGetCursorPos(window, &lastMousePosX, &lastMousePosY);
 
     // Other OpenGL states to set once
-    // Backface culling disabled for the skybox
     glEnable(GL_CULL_FACE);
 
     // Enable Depth Test
@@ -662,37 +778,34 @@ int main(int argc, char* argv[])
     int previousBstate = GLFW_RELEASE;
     int previousLstate = GLFW_RELEASE;
     int previousKstate = GLFW_RELEASE;
-    int previousJstate = GLFW_RELEASE;
 
-    // Initilize variables tied to the spotlight rotation
-    bool rotateSpotlight = false;
-    double timing = 0;
-    float xdir = 1.0f;
-    float ydir = 1.0f;
-    float zdir = 1.0f;
-    vec3 zLightFocus(0.0, 0.0f, -1.0f);      // the point in 3D space the light "looks" at
-
-    // Randomize the initial direction the spotlight will move in
-    srand(time(0));
-    if ((rand() % 2 == 0))
-    {
-        xdir *= -1.0f;
-    }
-    if ((rand() % 2 == 0))
-    {
-        ydir *= -1.0f;
-    }
-    if ((rand() % 2 == 0))
-    {
-        zdir *= -1.0f;
-    }
 
     // Player poisition reference and initial positions
     vec3* playerPosition = NULL;
+    Racket* currentRacket = NULL;
     vec3 playerOneLoc = vec3(-16.0f, 1.3f, 0.0f);
     vec3 playerTwoLoc = vec3(16.0f, 1.3f, 0.0f);
+    vec3 ballLocation = vec3(0.0f, 6.0f, 0.0f);
+    vec3 ballColor = vec3(0.224f, 1.0f, 0.078f);
 
-    Racket* currentRacket = NULL;
+    float acceleration = 1.0f;
+    // Randomize the initial direction the ball will move in
+    srand(time(0));
+    float xdir;
+    if (rand() % 2 == 1)
+    {
+        xdir = ((rand() % 3) + 3.0f) / 10;
+        playerPosition = (&playerTwoLoc);
+        
+    }
+    else
+    {
+        xdir = -((rand() % 3) + 3.0f) / 10;
+        playerPosition = (&playerOneLoc);
+    }
+    float ydir = 0.0f;
+    float zdir = ((rand() % 10) - 5.0f) / 10;
+    vec3 zLightFocus(0.0, 0.0f, -1.0f);      // the point in 3D space the light "looks" at
 
     // Player colors, contains the possible colors for the player letter
     vec3 playerColors[4][3] = { {vec3(0.0f, 0.0f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 1.0f)},
@@ -723,53 +836,24 @@ int main(int argc, char* argv[])
         circleCamera.z = cos(radians(circleCameraAngle)) * 30.0f;
         circleLookAt = circleFocus - circleCamera;
 
-        vec3 zLightPosition = vec3(0.0f, 5.0f, 30.0f); // the location of the light in 3D space
-
-        // Spotlight rotation container
-        timing += dt;
-        if (rotateSpotlight)
+        // Bounce on the invisible z walls and the set y limit
+        if ((ballLocation.y < 0.5f) | (ballLocation.y > 10.0f))
         {
-            // Every 5 seconds this should trigger and rerandomize the direction the light is moving in
-            srand(time(0));
-            if (timing > 5) 
-            { 
-                if ((rand() % 2 == 0))
-                {
-                    xdir *= -1.0f;
-                }
-                if ((rand() % 2 == 0))
-                {
-                    ydir *= -1.0f;
-                }
-                if ((rand() % 2 == 0))
-                {
-                    zdir *= -1.0f;
-                }
-                timing = 0;
-            }
-            
-            // If the spotlight focuses on something off the model, return it back into the right spot
-            if ((zLightFocus.x < -36.0f) | (zLightFocus.x > 36.0f))
-            {
-                xdir *= -1.0f;
-            }
-            if ((zLightFocus.y < -1.0f) | (zLightFocus.y > 5.0f))
-            {
-                ydir *= -1.0f;
-            }
-            if ((zLightFocus.z < -18.0f) | (zLightFocus.z > 18.0f))
-            {
-                zdir *= -1.0f;
-            }
-
-            // This is the actual movement of the focus of the spotlight
-            zLightFocus.x += xdir * dt * 2.0f;
-            zLightFocus.y += ydir * dt * 2.0f;
-            zLightFocus.z += zdir * dt * 2.0f;
+            ydir *= -1.0f;
+        }
+        if ((ballLocation.z < -17.5f) | (ballLocation.z > 17.5f))
+        {
+            zdir *= -1.0f;
         }
 
-        vec3 zLightDirection = normalize(zLightFocus - zLightPosition);
-        vec3 zSpotlightColor = vec3(1.0f, 1.0f, 1.0f);
+        // This is the actual movement of the focus of the spotlight
+        ballLocation.x += xdir * dt * 5.0f * acceleration;
+        ballLocation.y += ydir * dt * 5.0f * acceleration;
+        ballLocation.z += zdir * dt * 5.0f * acceleration;
+
+        vec3 zLightPosition = vec3(0.0f, 5.0f, 30.0f); // the location of the light in 3D space
+        vec3 zLightDirection = normalize(ballLocation - zLightPosition);
+        vec3 zSpotlightColor = vec3(1.0f, 1.0f, 0.0f);
         SetUniformVec3(shaderScene, "zSpotLight_pos", zLightPosition);
         SetUniformVec3(shaderScene, "zSpotLight_dir", zLightDirection);
         SetUniformVec3(shaderScene, "zSpotLight_color", zSpotlightColor);
@@ -787,8 +871,8 @@ int main(int argc, char* argv[])
         SetUniformMat4(shaderScene, "light_view_proj_matrix", lightSpaceMatrix);
  
         // Set light cutoff angles on scene shader
-        float lightAngleOuter = 30.0f;
-        float lightAngleInner = 10.0f;
+        float lightAngleOuter = 7.5f;
+        float lightAngleInner = 5.0f;
         SetUniformfValue(shaderScene, "light_cutoff_inner", cos(radians(lightAngleInner)));
         SetUniformfValue(shaderScene, "light_cutoff_outer", cos(radians(lightAngleOuter)));
 
@@ -802,7 +886,6 @@ int main(int argc, char* argv[])
         // Set the view matrix
         mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraLookAt + viewChange, cameraUp);
         SetUniformMat4(shaderScene, "view_matrix", viewMatrix);
-
         SetUniformVec3(shaderScene, "view_position", cameraPosition);
 
         // First pass
@@ -815,6 +898,16 @@ int main(int argc, char* argv[])
             glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
             // Clear depth data on the framebuffer
             glClear(GL_DEPTH_BUFFER_BIT);
+
+            //Draw tennis ball
+            glBindVertexArray(sphereVAO);
+            mat4 sphereSize = scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
+            mat4 sphereMatrix = translate(mat4(1.0f), vec3(ballLocation));
+            sphereMatrix = sphereMatrix * sphereSize;
+
+            mat4 spherePosistion = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f)) * sphereMatrix;
+            SetUniformMat4(shaderShadow, "world_matrix", spherePosistion);
+            glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 
             glBindVertexArray(vao);
             // Draw X axis, colored red
@@ -940,21 +1033,24 @@ int main(int argc, char* argv[])
 
             // Draw the letter l, bound to player 1 position
             mat4 lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.5f, 0.0f));
-            lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+            lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
+            lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
             SetUniformMat4(shaderShadow, "world_matrix", lCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.15f * cos(radians(armAngles[0][1] + 90.0f))));
-            lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+            lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+            lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", lCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             // Draw the letter i, bound to player 1 position
             mat4 iCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
             iCharacter = iCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-            iCharacter = rotate(iCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+            iCharacter = rotate(iCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            iCharacter = translate(iCharacter, vec3(0.0f, 0.0f, 0.3f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", iCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -963,46 +1059,53 @@ int main(int argc, char* argv[])
 
             // Draw the letter a, bound to player 2 position
             mat4 aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            aCharacter = aCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.25f * cos(radians(armAngles[1][1] + 90.0f))));
-            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+            aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", aCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            aCharacter = aCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.25f * cos(radians(armAngles[1][1] + 90.0f))));
-            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+            aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.6f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", aCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            aCharacter = aCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 2.2f, 0.0f));
-            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+            aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 2.15f, 0.0f));
+            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
             SetUniformMat4(shaderShadow, "world_matrix", aCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            aCharacter = aCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.9f, 0.0f));
-            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+            aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.8f, 0.0f));
+            aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
             SetUniformMat4(shaderShadow, "world_matrix", aCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             // Draw the letter n, bound to player 2 position
             mat4 nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            nCharacter = nCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.25f * cos(radians(armAngles[1][1] + 90.0f))));
-            nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-            SetUniformMat4(shaderShadow, "world_matrix", nCharacter);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            nCharacter = nCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+            nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
             nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-            nCharacter = rotate(nCharacter, radians(37.7f), vec3(1.0f, 0.0, 0.0)) * scale(mat4(1.0f), vec3(0.2f, 0.8f, 0.2f));
+            nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.55f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", nCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
             nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-            nCharacter = nCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.25 * cos(radians(armAngles[1][1] + 90.0f))));
-            nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+            nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+            nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.35f));
+            nCharacter = rotate(nCharacter, radians(30.0f), vec3(1.0f, 0.0, 0.0)) * scale(mat4(1.0f), vec3(0.2f, 0.8f, 0.2f));
+            SetUniformMat4(shaderShadow, "world_matrix", nCharacter);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+            nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+            nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.1f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
             SetUniformMat4(shaderShadow, "world_matrix", nCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
@@ -1034,8 +1137,19 @@ int main(int argc, char* argv[])
         // Clear color and depth data on framebuffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindVertexArray(vao);
+        // Draw tennis ball
+        glBindVertexArray(sphereVAO);
+        glBindTexture(GL_TEXTURE_2D, tennisBallTextureID);
+        mat4 sphereSize = scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
+        mat4 sphereMatrix = translate(mat4(1.0f), ballLocation);
+        sphereMatrix = sphereMatrix * sphereSize;
 
+        mat4 spherePosistion = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f)) * sphereMatrix;
+        SetUniformMat4(shaderScene, "world_matrix", spherePosistion);
+        SetUniformVec3(shaderScene, "object_color", vec3(ballColor));
+        glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+
+        glBindVertexArray(vao);
         glBindTexture(GL_TEXTURE_2D, whiteTextureID);
         // Draw X axis, colored red
         mat4 xAxis = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
@@ -1196,9 +1310,9 @@ int main(int argc, char* argv[])
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.15f * cos(radians(armAngles[0][1] + 90.0f))));
+        lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
         lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", lCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -1216,29 +1330,33 @@ int main(int argc, char* argv[])
         // Draw the letter a, bound to player 2 position
         glBindTexture(GL_TEXTURE_2D, aTextureID);
         mat4 aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, -0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.2f * cos(radians(armAngles[1][1] + 90.0f))));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", aCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, -0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.2f * cos(radians(armAngles[1][1] + 90.0f))));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.6f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", aCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, -0.35f)) * translate(mat4(1.0f), vec3(0.0f, 2.15f, 0.0f));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 2.15f, 0.0f));
+        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
         SetUniformMat4(shaderScene, "world_matrix", aCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, -0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.8f, 0.0f));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.8f, 0.0f));
+        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
         SetUniformMat4(shaderScene, "world_matrix", aCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -1246,33 +1364,32 @@ int main(int argc, char* argv[])
         // Draw the letter n, bound to player 2 position
         glBindTexture(GL_TEXTURE_2D, nTextureID);
         mat4 nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, 0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, -0.2f * cos(radians(armAngles[1][1] + 90.0f))));
-        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.55f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", nCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, 0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
         nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.35f));
         nCharacter = rotate(nCharacter, radians(30.0f), vec3(1.0f, 0.0, 0.0)) * scale(mat4(1.0f), vec3(0.2f, 0.8f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", nCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket + vec3(0.0f, 0.0f, 0.35f)) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.2 * cos(radians(armAngles[1][1] + 90.0f))));
-        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.1f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", nCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Retrun the transparency to 0
         SetUniformfValue(shaderScene, "transparency", 1.0f);
-
-        // This is to help view where the spotlight is actually moving
-        /*SetUniformMat4(shaderScene, "world_matrix", translate(mat4(1.0f), zLightFocus));
-        glDrawArrays(GL_TRIANGLES, 0, 36);*/
 
         //begin drawing the skybox
         GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
@@ -1287,6 +1404,57 @@ int main(int argc, char* argv[])
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glDepthFunc(GL_LESS);
+
+        if (*(playerPosition) == playerOneLoc)
+        {
+            currentRacket = &playerOne;
+        }
+        else if (*(playerPosition) == playerTwoLoc)
+        {
+            currentRacket = &playerTwo;
+        }
+
+        if (CheckCollision(ballLocation, playerOneLoc + playerOne.centerOfRacket))
+        {   
+            float reflectedAngle = 2 * armAngles[0][1];
+            xdir = cos(radians(reflectedAngle)) * -1.0f;
+            zdir = sin(radians(reflectedAngle)) * 1.0f;
+            ballColor = vec3(1.0f, 0.0f, 0.0f);
+            currentRacket = &playerTwo;
+            playerPosition = &playerTwoLoc;
+            acceleration *= 1.05f;
+        }
+        if (CheckCollision(ballLocation, playerTwoLoc + playerTwo.centerOfRacket))
+        {
+            float reflectedAngle = 2 * armAngles[1][1];
+            xdir = cos(radians(reflectedAngle)) * 1.0f;
+            zdir = sin(radians(reflectedAngle)) * -1.0f;
+            ballColor = vec3(0.0f, 0.0f, 1.0f);
+            currentRacket = &playerOne;
+            playerPosition = &playerOneLoc;
+            acceleration *= 1.05f;
+        }
+        if ((ballLocation.x < -35.5f) | (ballLocation.x > 35.5f))
+        {
+            // Rerandomize starting movement
+            srand(time(0));
+            if (rand() % 2 == 1)
+            {
+                xdir = ((rand() % 3) + 3.0f) / 10;
+                currentRacket = &playerTwo;
+                playerPosition = &playerTwoLoc;
+                acceleration = 1.0f;
+            }
+            else
+            {
+                xdir = -((rand() % 3) + 3.0f) / 10;
+                currentRacket = &playerOne;
+                playerPosition = &playerOneLoc;
+                acceleration = 1.0f;
+            }
+            zdir = ((rand() % 10) - 5.0f) / 10;
+            ballLocation = vec3(0.0f, 6.0f, 0.0f);
+        }
 
         // End Frame
         glfwSwapBuffers(window);
@@ -1305,17 +1473,24 @@ int main(int argc, char* argv[])
                 // Movement is revered for players 1 on the other side of the net
                 if ((*currentRacket).playerNumber < 2)
                 {
-                    (*playerPosition).z -= 1.0f * dt;
+                    (*playerPosition).z -= 4.0f * dt;
                 }
                 else
                 {
-                    (*playerPosition).z += 1.0f * dt;
+                    (*playerPosition).z += 4.0f * dt;
                 }
             }
             // Lowercase A - Rotate left
             else
             {
-                armAngles[(*currentRacket).playerNumber-1][1] += 10.0f * dt;
+                if (armAngles[(*currentRacket).playerNumber - 1][1] > 120.0f)
+                {
+                    armAngles[(*currentRacket).playerNumber - 1][1] = 120.0f;
+                }
+                else
+                {
+                    armAngles[(*currentRacket).playerNumber - 1][1] += 10.0f * dt;
+                }
             }
         }
 
@@ -1327,17 +1502,24 @@ int main(int argc, char* argv[])
                 // Movement is revered for players 1 on the other side of the net
                 if ((*currentRacket).playerNumber < 2)
                 {
-                    (*playerPosition).z += 1.0f * dt;
+                    (*playerPosition).z += 4.0f * dt;
                 }
                 else
                 {
-                    (*playerPosition).z -= 1.0f * dt;
+                    (*playerPosition).z -= 4.0f * dt;
                 }
             }
             // Lowercase D - Rotate right
             else
             {
-                armAngles[(*currentRacket).playerNumber-1][1] -= 10.0f * dt;
+                if (armAngles[(*currentRacket).playerNumber - 1][1] < 60.0f)
+                {
+                    armAngles[(*currentRacket).playerNumber - 1][1] = 60.0f;
+                }
+                else
+                {
+                    armAngles[(*currentRacket).playerNumber - 1][1] -= 10.0f * dt;
+                }
             }
         }
 
@@ -1346,11 +1528,11 @@ int main(int argc, char* argv[])
             // Movement is revered for players 1 on the other side of the net
             if ((*currentRacket).playerNumber < 2)
             {
-                (*playerPosition).x -= 1.0f * dt;
+                (*playerPosition).x -= 4.0f * dt;
             }
             else
             {
-                (*playerPosition).x += 1.0f * dt;
+                (*playerPosition).x += 4.0f * dt;
             }
         }
 
@@ -1359,18 +1541,18 @@ int main(int argc, char* argv[])
             // Movement is revered for players 1 on the other side of the net
             if ((*currentRacket).playerNumber < 2)
             {
-                (*playerPosition).x += 1.0f * dt;
+                (*playerPosition).x += 4.0f * dt;
             }
             else
             {
-                (*playerPosition).x -= 1.0f * dt;
+                (*playerPosition).x -= 4.0f * dt;
             }
         }
 
         // Arrow keys
         if ((glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)) // Left arrow
         {
-            circleCameraAngle -= 5.0f * dt;
+            circleCameraAngle -= 10.0f * dt;
             cameraPosition = circleCamera;
             cameraLookAt = circleLookAt;
 
@@ -1389,7 +1571,7 @@ int main(int argc, char* argv[])
 
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) // Right arrow 
         {
-            circleCameraAngle += 5.0f * dt;
+            circleCameraAngle += 10.0f * dt;
             cameraPosition = circleCamera;
             cameraLookAt = circleLookAt;
 
@@ -1432,7 +1614,7 @@ int main(int argc, char* argv[])
             // Return current player to default null value
             playerPosition = NULL;
 
-            FOV = 70.0f;
+            FOV = 70.6f;
         }
 
         if (previousXstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) // X - Toggle textures
@@ -1499,16 +1681,6 @@ int main(int argc, char* argv[])
             }
         }
         previousKstate = glfwGetKey(window, GLFW_KEY_K);
-
-        if (previousJstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) // J - activate spotlight movement
-        {
-            rotateSpotlight = !rotateSpotlight;
-            if (rotateSpotlight) 
-            {
-                zLightFocus = vec3(0.0, 0.0f, -1.0f);      // reinitiate where the spotlight starts
-            }
-        }
-        previousJstate = glfwGetKey(window, GLFW_KEY_J);
 
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) // 1 - Set player 1 as the current player
         {
