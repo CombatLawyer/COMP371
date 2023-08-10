@@ -39,6 +39,9 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>../COMP371/lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>../COMP371/code/include/irrklang;../COMP371/code/include;../COMP371/_deps/thirdparty-glew-src/include;../COMP371/_deps/thirdparty-glfw-src/include;../COMP371/_deps/thirdparty-glm-src/glm/..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -118,6 +121,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{6B497B75-E084-3F05-A9E9-58A36370C5F1}</Project>
       <Name>glfw</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

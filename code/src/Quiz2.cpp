@@ -25,6 +25,7 @@
 
 #include <irrKlang.h>
 using namespace irrklang;
+#pragma comment(lib, "irrKlang.lib")
 
 #include "OBJloader.h"    //For loading .obj files
 
@@ -706,9 +707,9 @@ int main(int argc, char* argv[])
     GLuint shaderShadow = loadSHADER(shaderPathPrefix + "shadow_vertex.glsl", shaderPathPrefix + "shadow_fragment.glsl");
     GLuint shaderSkybox = loadSHADER(shaderPathPrefix + "skybox_vertex.glsl", shaderPathPrefix + "skybox_fragment.glsl");
 
-    // Being music
+    // Begin music
     ISoundEngine* SoundEngine = createIrrKlangDevice();
-    SoundEngine->play2D("audio/breakout.mp3", true);
+    SoundEngine->play2D("code/assets/audio/themeSong.mp3", true);
 
     // Used to trigger specific flags in the scene shader
     GLuint textureFlag = glGetUniformLocation(shaderScene, "useTexture"); // Determines if textures need to be turned on
@@ -1595,6 +1596,7 @@ int main(int argc, char* argv[])
             currentRacket = &playerTwo;
             playerPosition = &playerTwoLoc;
             acceleration *= 1.05f;
+            SoundEngine->play2D("code/assets/audio/tennisHit.mp3", false);
         }
         if (CheckCollision(ballLocation, playerTwoLoc + playerTwo.centerOfRacket))
         {
@@ -1605,6 +1607,7 @@ int main(int argc, char* argv[])
             currentRacket = &playerOne;
             playerPosition = &playerOneLoc;
             acceleration *= 1.05f;
+            SoundEngine->play2D("code/assets/audio/tennisHit.mp3", false);
         }
         if ((ballLocation.x < -35.5f) | (ballLocation.x > 35.5f))
         {
