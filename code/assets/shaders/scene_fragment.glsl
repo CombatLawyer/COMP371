@@ -41,7 +41,7 @@ in vec3 vertexColor;
 in vec2 vertexUV;
 uniform sampler2D textureSampler;
 
-uniform int useTexture = 0;
+uniform int useTexture = 1;
 uniform int useColor = 0;
 uniform int useShadow = 0;
 uniform int useSpotlightZ = 0;

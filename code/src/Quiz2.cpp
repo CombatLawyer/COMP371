@@ -861,11 +861,10 @@ int main(int argc, char* argv[])
     GLenum renderMode = GL_TRIANGLES;
 
     // Initilize variables to allow holding the button to not spam the button
-    int previousXstate = GLFW_RELEASE;
+    int previousVstate = GLFW_RELEASE;
     int previousBstate = GLFW_RELEASE;
-    int previousLstate = GLFW_RELEASE;
-    int previousKstate = GLFW_RELEASE;
-
+    int previousNstate = GLFW_RELEASE;
+    int previousMstate = GLFW_RELEASE;
 
     // Player poisition reference and initial positions
     vec3* playerPosition = NULL;
@@ -1408,26 +1407,24 @@ int main(int argc, char* argv[])
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Drawing the net, first the posts
-        glBindTexture(GL_TEXTURE_2D, glossTextureID);
         mat4 netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, -19.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, 19.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glBindTexture(GL_TEXTURE_2D, ropeTextureID);
         // Now draw the net
         mat4 net = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         net = net * translate(mat4(1.0f), vec3(0.0f, 4.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.4f, 0.4f, 38.5f));
@@ -1435,7 +1432,6 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
         for (int i = 0; i < 39; ++i)
         {
             // Draw vertical lines for the net
@@ -1463,8 +1459,8 @@ int main(int argc, char* argv[])
         }
 
         // Draw the two rackets at the specific spots the players should be
-        Racket playerOne = Racket(worldXAngle, worldYAngle, playerOneLoc, shaderScene, renderMode, 1, armAngles[0][0], armAngles[0][1], armAngles[0][2], armAngles[0][3], tatooTextureID, metalicTextureID, true);
-        Racket playerTwo = Racket(worldXAngle, worldYAngle, playerTwoLoc, shaderScene, renderMode, 2, armAngles[1][0], armAngles[1][1], armAngles[1][2], armAngles[1][3], tatooTextureID, metalicTextureID, true);
+        Racket playerOne = Racket(worldXAngle, worldYAngle, playerOneLoc, shaderScene, renderMode, 1, armAngles[0][0], armAngles[0][1], armAngles[0][2], armAngles[0][3], whiteTextureID, metalicTextureID, true);
+        Racket playerTwo = Racket(worldXAngle, worldYAngle, playerTwoLoc, shaderScene, renderMode, 2, armAngles[1][0], armAngles[1][1], armAngles[1][2], armAngles[1][3], whiteTextureID, metalicTextureID, true);
         
         // Change transparency
         SetUniformfValue(shaderScene, "transparency", 0.4f);
@@ -1792,120 +1788,127 @@ int main(int argc, char* argv[])
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        // Camera lookat and side vectors to update positions with ASDW
-        if ((glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) & (playerPosition != NULL))
+        // PLAYER 1 MOVEMENT CONTROLS
+
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // A - Move player 1 to the left
         {
-            // Uppercase A - move camera to the left
-            if ((glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) | glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) == GLFW_PRESS)
+            playerOneLoc.z -= 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerOneLoc.z < -16.0f)
             {
-                // Movement is revered for players 1 on the other side of the net
-                if ((*currentRacket).playerNumber < 2)
-                {
-                    (*playerPosition).z -= 4.0f * dt;
-                    if ((*playerPosition).z < -16.0f)
-                    {
-                        (*playerPosition).z = -16.0f;
-                    }
-                }
-                else
-                {
-                    (*playerPosition).z += 4.0f * dt;
-                    if ((*playerPosition).z > 16.0f)
-                    {
-                        (*playerPosition).z = 16.0f;
-                    }
-                }
-            }
-            // Lowercase A - Rotate left
-            else
-            {
-                if (armAngles[(*currentRacket).playerNumber - 1][1] > 120.0f)
-                {
-                    armAngles[(*currentRacket).playerNumber - 1][1] = 120.0f;
-                }
-                else
-                {
-                    armAngles[(*currentRacket).playerNumber - 1][1] += 10.0f * dt;
-                }
+                playerOneLoc.z = -16.0f;
             }
         }
 
-        if ((glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) & (playerPosition != NULL)) // D - move camera to the right
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // D - Move player 1 to the right
         {
-            // Uppercase D - move camera to the right
-            if ((glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) | glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) == GLFW_PRESS)
+            playerOneLoc.z += 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerOneLoc.z > 16.0f)
             {
-                // Movement is revered for players 1 on the other side of the net
-                if ((*currentRacket).playerNumber < 2)
-                {
-                    (*playerPosition).z += 4.0f * dt;
-                    if ((*playerPosition).z > 16.0f)
-                    {
-                        (*playerPosition).z = 16.0f;
-                    }
-                }
-                else
-                {
-                    (*playerPosition).z -= 4.0f * dt;
-                    if ((*playerPosition).z < -16.0f)
-                    {
-                        (*playerPosition).z = -16.0f;
-                    }
-                }
-            }
-            // Lowercase D - Rotate right
-            else
-            {
-                if (armAngles[(*currentRacket).playerNumber - 1][1] < 60.0f)
-                {
-                    armAngles[(*currentRacket).playerNumber - 1][1] = 60.0f;
-                }
-                else
-                {
-                    armAngles[(*currentRacket).playerNumber - 1][1] -= 10.0f * dt;
-                }
+                playerOneLoc.z = 16.0f;
             }
         }
 
-        if ((glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) & (playerPosition != NULL)) // S - move camera up
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // S - Move player 1 forwards
         {
-            // Movement is revered for players 1 on the other side of the net
-            if ((*currentRacket).playerNumber < 2)
+            playerOneLoc.x -= 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerOneLoc.x < -32.0f)
             {
-                (*playerPosition).x -= 4.0f * dt;
-                if ((*playerPosition).x < -32.0f)
-                {
-                    (*playerPosition).x = -32.0f;
-                }
-            }
-            else
-            {
-                (*playerPosition).x += 4.0f * dt;
-                if ((*playerPosition).x > 32.0f)
-                {
-                    (*playerPosition).x = 32.0f;
-                }
+                playerOneLoc.x = -32.0f;
             }
         }
 
-        if ((glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) & (playerPosition != NULL)) // W - move camera down
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // W - Move player 1 backwards
         {
-            // Movement is revered for players 1 on the other side of the net
-            if ((*currentRacket).playerNumber < 2)
+            playerOneLoc.x += 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerOneLoc.x > -1.0f)
             {
-                (*playerPosition).x += 4.0f * dt;
-                if ((*playerPosition).x > -1.0f)
-                {
-                    (*playerPosition).x = -1.0f;
-                }
+                playerOneLoc.x = -1.0f;
             }
-            else
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) // Q - Rotate player 1 to the left
+        {
+            armAngles[0][1] += 10.0f * dt;
+            // Cap movement so player cannot rotate the racket 45+ degrees making the ball bounce from wall to wall
+            if (armAngles[0][1] > 120.0f)
             {
-                (*playerPosition).x -= 4.0f * dt;
-                if ((*playerPosition).x < 1.0f)
-                {
-                    (*playerPosition).x = 1.0f;
-                }
+                armAngles[0][1] = 120.0f;
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) // E - Rotate player 1 to the right
+        {
+            armAngles[0][1] -= 10.0f * dt;
+            // Cap movement so player cannot rotate the racket 45+ degrees making the ball bounce from wall to wall
+            if (armAngles[0][1] < 60.0f)
+            {
+                armAngles[0][1] = 60.0f;
+            }
+        }
+
+        // PLAYER 2 MOVEMENT CONTROLS
+
+        if ((glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)) // J - Move player 2 to the left
+        {
+            playerTwoLoc.z += 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerTwoLoc.z > 16.0f)
+            {
+                playerTwoLoc.z = 16.0f;
+            }           
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) // L - Move player 2 to the right
+        {
+            playerTwoLoc.z -= 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerTwoLoc.z < -16.0f)
+            {
+                playerTwoLoc.z = -16.0f;
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) // I - Move player 2 forwards
+        {
+            playerTwoLoc.x -= 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerTwoLoc.x < 1.0f)
+            {
+                playerTwoLoc.x = 1.0f;
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) // K - Move player 2 backwards
+        {
+            playerTwoLoc.x += 4.0f * dt;
+            // Cap movement so player cannot move off the court
+            if (playerTwoLoc.x > 32.0f)
+            {
+                playerTwoLoc.x = 32.0f;
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) // U - Rotate player 2 to the left
+        {
+            armAngles[1][1] += 10.0f * dt;
+            // Cap movement so player cannot rotate the racket 45+ degrees making the ball bounce from wall to wall
+            if (armAngles[1][1] > 120.0f)
+            {
+                armAngles[1][1] = 120.0f;
+            }
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) // O - Rotate player 2 to the right
+        {
+            armAngles[1][1] -= 10.0f * dt;
+            // Cap movement so player cannot rotate the racket 45+ degrees making the ball bounce from wall to wall
+            if (armAngles[1][1] < 60.0f)
+            {
+                armAngles[1][1] = 60.0f;
             }
         }
 
@@ -1939,7 +1942,7 @@ int main(int argc, char* argv[])
             viewChange = vec3(0.0f, 0.0f, 0.0f);
         }
 
-        // Arrow keys
+        // World movement
         if ((glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)) // F - Rotate world in the postive x axis
         {
             worldXAngle -= 2.0f;
@@ -1977,7 +1980,7 @@ int main(int argc, char* argv[])
             FOV = 70.6f;
         }
 
-        if (previousXstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) // X - Toggle textures
+        if (previousVstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) // V - Toggle textures
         {
             glGetUniformiv(shaderScene, textureFlag, currentTextureValue);
             if (currentTextureValue[0] == 1)
@@ -1992,7 +1995,7 @@ int main(int argc, char* argv[])
                 glUniform1i(textureFlag, 1);
             }
         }
-        previousXstate = glfwGetKey(window, GLFW_KEY_X);
+        previousVstate = glfwGetKey(window, GLFW_KEY_V);
 
         if (previousBstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) // B - Toggle shadows
         {
@@ -2010,7 +2013,7 @@ int main(int argc, char* argv[])
         }
         previousBstate = glfwGetKey(window, GLFW_KEY_B);
 
-        if (previousLstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) // L - Toggle z spotlight
+        if (previousMstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) // M - Toggle z spotlight
         {
             glGetUniformiv(shaderScene, zSpotlightFlag, currentZSpotlightValue);
             if (currentZSpotlightValue[0] == 1)
@@ -2024,9 +2027,9 @@ int main(int argc, char* argv[])
                 glUniform1i(zSpotlightFlag, 1); 
             }
         }
-        previousLstate = glfwGetKey(window, GLFW_KEY_L);
+        previousMstate = glfwGetKey(window, GLFW_KEY_M);
 
-        if (previousKstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) // K - Toggle y spotlight
+        if (previousNstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) // N - Toggle y spotlight
         {
             glGetUniformiv(shaderScene, ySpotlightFlag, currentYSpotlightValue);
             if (currentYSpotlightValue[0] == 1)
@@ -2040,7 +2043,7 @@ int main(int argc, char* argv[])
                 glUniform1i(ySpotlightFlag, 1);
             }
         }
-        previousKstate = glfwGetKey(window, GLFW_KEY_K);
+        previousNstate = glfwGetKey(window, GLFW_KEY_N);
 
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) // 1 - Set player 1 as the current player
         {
@@ -2077,17 +2080,17 @@ int main(int argc, char* argv[])
         }
 
         // Different rendering modes
-        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) // P - Render model as points
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) // Z - Render model as points
         {
             renderMode = GL_POINTS;
         }
 
-        if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) // O - Render model as lines
+        if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) // X - Render model as lines
         {
             renderMode = GL_LINES;
         }
 
-        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) // I - Render model as triangles
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) // C - Render model as triangles
         {
             renderMode = GL_TRIANGLES;
         }
