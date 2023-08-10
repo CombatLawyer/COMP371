@@ -23,6 +23,11 @@
 #include <stb_image.h>
 #include <shaderloader.h>
 
+#include <irrKlang.h>
+using namespace irrklang;
+
+#include "OBJloader.h"    //For loading .obj files
+
 using namespace glm;
 using namespace std;
 
@@ -521,6 +526,19 @@ public:
     }
 };
 
+void drawScoreboard(GLuint shader, int p1Score, int p2Score)
+{
+    mat4 scoreBoardMatrix = scale(mat4(1.0f), vec3(0.2f, 3.0f, 5.0f));
+    mat4 location = translate(mat4(1.0f), vec3(-0.5f, 10.0f, 0.0f));
+    location = rotate(location, radians(30.0f), vec3(0.0f, 0.0f, 1.0f));
+
+    mat4 worldMatrix = location * scoreBoardMatrix;
+    // Draw the horizontal string
+    SetUniformMat4(shader, "world_matrix", worldMatrix);
+    SetUniformVec3(shader, "object_color", vec3(0.0f, 0.0f, 0.0f));
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
 GLuint loadTexture(const char* filename)
 {
     // Step1 Create and bind textures
@@ -574,6 +592,71 @@ bool CheckCollision(vec3 ballPosition, vec3 racketPosition)
     return length(difference) < 0.5f;
 }
 
+// 3d model VBO (lab 8)
+GLuint setupModelVBO(string path, int& vertexCount) {
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> UVs;
+
+    // read the vertex data from the model's OBJ file
+    loadOBJ(path.c_str(), vertices, normals, UVs);
+
+    GLuint VAO3d;
+    glGenVertexArrays(1, &VAO3d);
+    glBindVertexArray(VAO3d);  // Becomes active VAO
+    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and
+    // attribute pointer(s).
+
+    // Vertex VBO setup
+    GLuint vertices_VBO;
+    glGenBuffers(1, &vertices_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vertices_VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3),
+        &vertices.front(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+        (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normals VBO setup
+    GLuint normals_VBO;
+    glGenBuffers(1, &normals_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, normals_VBO);
+    glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3),
+        &normals.front(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+        (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+
+    // UVs VBO setup
+    GLuint uvs_VBO;
+    glGenBuffers(1, &uvs_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, uvs_VBO);
+    glBufferData(GL_ARRAY_BUFFER, UVs.size() * sizeof(glm::vec2), &UVs.front(),
+        GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat),
+        (GLvoid*)0);
+    glEnableVertexAttribArray(2);
+
+    
+    // Additional attribute setup
+    GLuint additionalAttr_VBO;
+    glGenBuffers(1, &additionalAttr_VBO);
+    //glBindBuffer(GL_ARRAY_BUFFER, additionalAttr_VBO);
+    // Assuming your additional attribute is of type glm::vec3
+    //glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3),&vertices.front(), GL_STATIC_DRAW);
+    //glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    //glEnableVertexAttribArray(3);
+    
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // VAO already stored the state we just defined, safe to unbind buffer
+
+    glBindVertexArray(0);
+    // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent
+    // strange bugs, as we are using multiple VAOs)
+    vertexCount = vertices.size();
+    return VAO3d;
+}
+
 int main(int argc, char* argv[])
 {
     // Initialize GLFW and OpenGL version
@@ -622,6 +705,10 @@ int main(int argc, char* argv[])
     GLuint shaderScene = loadSHADER(shaderPathPrefix + "scene_vertex.glsl", shaderPathPrefix + "scene_fragment.glsl");
     GLuint shaderShadow = loadSHADER(shaderPathPrefix + "shadow_vertex.glsl", shaderPathPrefix + "shadow_fragment.glsl");
     GLuint shaderSkybox = loadSHADER(shaderPathPrefix + "skybox_vertex.glsl", shaderPathPrefix + "skybox_fragment.glsl");
+
+    // Being music
+    ISoundEngine* SoundEngine = createIrrKlangDevice();
+    SoundEngine->play2D("audio/breakout.mp3", true);
 
     // Used to trigger specific flags in the scene shader
     GLuint textureFlag = glGetUniformLocation(shaderScene, "useTexture"); // Determines if textures need to be turned on
@@ -819,6 +906,16 @@ int main(int argc, char* argv[])
                               {0.0f, 90.0f, 0.0f, 0.0f} };
     
     double mousePosX, mousePosY;
+    bool sideCamera = false;
+
+    // Setup 3d models (lab 8)
+    string fenceModel = "code/assets/3dModels/fence.obj";
+
+    // 3d models vertices (lab 8)
+    int fenceVertices;
+
+    // setup VBO (lab 8)
+    GLuint fenceVAO = setupModelVBO(fenceModel, fenceVertices);
 
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
@@ -898,6 +995,40 @@ int main(int argc, char* argv[])
             glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
             // Clear depth data on the framebuffer
             glClear(GL_DEPTH_BUFFER_BIT);
+
+            // ================================================================ //
+            //						Draw 3D Models (lab 8)						//
+            // ================================================================ //
+
+            glBindVertexArray(fenceVAO);    // bind
+            //glBindTexture(GL_TEXTURE_2D, whiteTextureID);   // set fence texture
+
+            // "left" fence
+            mat4 fenceLeft = translate(mat4(1.0f), vec3(0.0f, 0.0f, 30.0f)) *
+                scale(mat4(1.0f), vec3(0.15f, 0.04f, 0.1f));
+            SetUniformMat4(shaderShadow, "world_matrix", fenceLeft);
+            glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+            // "right" fence
+            mat4 fenceRight = translate(mat4(1.0f), vec3(0.0f, 0.0f, -30.0f)) *
+                scale(mat4(1.0f), vec3(0.15f, 0.04f, 0.1f));
+            SetUniformMat4(shaderShadow, "world_matrix", fenceRight);
+            glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+            // "back" fence
+            mat4 fenceBack = translate(mat4(1.0f), vec3(-53.0f, 0.0f, 0.0f)) *
+                rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                scale(mat4(1.0f), vec3(0.08f, 0.04f, 0.1f));
+            SetUniformMat4(shaderShadow, "world_matrix", fenceBack);
+            glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+            // "front" fence
+            mat4 fenceFront = translate(mat4(1.0f), vec3(53.0f, 0.0f, 0.0f)) *
+                rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                scale(mat4(1.0f), vec3(0.08f, 0.04f, 0.1f));
+            SetUniformMat4(shaderShadow, "world_matrix", fenceFront);
+            glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
 
             //Draw tennis ball
             glBindVertexArray(sphereVAO);
@@ -1110,6 +1241,8 @@ int main(int argc, char* argv[])
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        drawScoreboard(shaderShadow, 0, 0);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Second pass
@@ -1136,6 +1269,43 @@ int main(int argc, char* argv[])
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // Clear color and depth data on framebuffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // ================================================================ //
+        //						Draw 3D Models (lab 8)						//
+        // ================================================================ //
+       
+        glBindVertexArray(fenceVAO);    // bind
+        glBindTexture(GL_TEXTURE_2D, iTextureID);   // set fence texture
+
+        // "left" fence
+        mat4 fenceLeft = translate(mat4(1.0f), vec3(0.0f, 0.0f, 30.0f))*
+            scale(mat4(1.0f), vec3(0.15f, 0.04f, 0.1f));
+        SetUniformMat4(shaderScene, "world_matrix", fenceLeft);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+        // "right" fence
+        mat4 fenceRight = translate(mat4(1.0f), vec3(0.0f, 0.0f, -30.0f)) *
+            scale(mat4(1.0f), vec3(0.15f, 0.04f, 0.1f));
+        SetUniformMat4(shaderScene, "world_matrix", fenceRight);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+        // "back" fence
+        mat4 fenceBack = translate(mat4(1.0f), vec3(-53.0f, 0.0f, 0.0f)) *
+            rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+            scale(mat4(1.0f), vec3(0.08f, 0.04f, 0.1f));
+        SetUniformMat4(shaderScene, "world_matrix", fenceBack);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+        // "front" fence
+        mat4 fenceFront = translate(mat4(1.0f), vec3(53.0f, 0.0f, 0.0f)) *
+            rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+            scale(mat4(1.0f), vec3(0.08f, 0.04f, 0.1f));
+        SetUniformMat4(shaderScene, "world_matrix", fenceFront);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
 
         // Draw tennis ball
         glBindVertexArray(sphereVAO);
@@ -1391,6 +1561,8 @@ int main(int argc, char* argv[])
         // Retrun the transparency to 0
         SetUniformfValue(shaderScene, "transparency", 1.0f);
 
+        drawScoreboard(shaderScene, 0, 0);
+
         //begin drawing the skybox
         GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
         glUniform1i(skyboxTextures, 1);
@@ -1474,10 +1646,18 @@ int main(int argc, char* argv[])
                 if ((*currentRacket).playerNumber < 2)
                 {
                     (*playerPosition).z -= 4.0f * dt;
+                    if ((*playerPosition).z < -16.0f)
+                    {
+                        (*playerPosition).z = -16.0f;
+                    }
                 }
                 else
                 {
                     (*playerPosition).z += 4.0f * dt;
+                    if ((*playerPosition).z > 16.0f)
+                    {
+                        (*playerPosition).z = 16.0f;
+                    }
                 }
             }
             // Lowercase A - Rotate left
@@ -1503,10 +1683,18 @@ int main(int argc, char* argv[])
                 if ((*currentRacket).playerNumber < 2)
                 {
                     (*playerPosition).z += 4.0f * dt;
+                    if ((*playerPosition).z > 16.0f)
+                    {
+                        (*playerPosition).z = 16.0f;
+                    }
                 }
                 else
                 {
                     (*playerPosition).z -= 4.0f * dt;
+                    if ((*playerPosition).z < -16.0f)
+                    {
+                        (*playerPosition).z = -16.0f;
+                    }
                 }
             }
             // Lowercase D - Rotate right
@@ -1529,10 +1717,18 @@ int main(int argc, char* argv[])
             if ((*currentRacket).playerNumber < 2)
             {
                 (*playerPosition).x -= 4.0f * dt;
+                if ((*playerPosition).x < -32.0f)
+                {
+                    (*playerPosition).x = -32.0f;
+                }
             }
             else
             {
                 (*playerPosition).x += 4.0f * dt;
+                if ((*playerPosition).x > 32.0f)
+                {
+                    (*playerPosition).x = 32.0f;
+                }
             }
         }
 
@@ -1542,10 +1738,18 @@ int main(int argc, char* argv[])
             if ((*currentRacket).playerNumber < 2)
             {
                 (*playerPosition).x += 4.0f * dt;
+                if ((*playerPosition).x > -1.0f)
+                {
+                    (*playerPosition).x = -1.0f;
+                }
             }
             else
             {
                 (*playerPosition).x -= 4.0f * dt;
+                if ((*playerPosition).x < 1.0f)
+                {
+                    (*playerPosition).x = 1.0f;
+                }
             }
         }
 
@@ -1563,7 +1767,7 @@ int main(int argc, char* argv[])
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) // Up arrow
         {
             // Return current player to default null value
-            playerPosition = NULL;
+            sideCamera = true;
 
             cameraPosition = circleCamera;
             cameraLookAt = circleLookAt;
@@ -1686,6 +1890,7 @@ int main(int argc, char* argv[])
         {
             // Reset view difference
             viewChange = vec3(0.0f, 0.0f, 0.0f);
+            sideCamera = false;
 
             // Change current player position reference to player 1
             playerPosition = &playerOneLoc;
@@ -1702,6 +1907,7 @@ int main(int argc, char* argv[])
         {
             // Reset view difference
             viewChange = vec3(0.0f, 0.0f, 0.0f);
+            sideCamera = false;
 
             // Change current player position reference to player 2
             playerPosition = &playerTwoLoc;
@@ -1786,8 +1992,9 @@ int main(int argc, char* argv[])
             }
         }
         glfwGetCursorPos(window, &lastMousePosX, &lastMousePosY);
-
-        if (playerPosition != NULL)
+        if (sideCamera) 
+        { }
+        else if (playerPosition != NULL)
         {
             if (playerPosition == &playerOneLoc)
             {

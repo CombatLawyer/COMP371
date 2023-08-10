@@ -41,7 +41,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>../COMP371/code/include;../COMP371/_deps/thirdparty-glew-src/include;../COMP371/_deps/thirdparty-glfw-src/include;../COMP371/_deps/thirdparty-glm-src/glm/..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../COMP371/code/include/irrklang;../COMP371/code/include;../COMP371/_deps/thirdparty-glew-src/include;../COMP371/_deps/thirdparty-glfw-src/include;../COMP371/_deps/thirdparty-glm-src/glm/..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
