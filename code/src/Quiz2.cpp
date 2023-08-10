@@ -689,8 +689,6 @@ int main(int argc, char* argv[])
     GLuint tennisBallTextureID = loadTexture("code/assets/textures/tennisball.jpg");
     GLuint playerOneTextureID = loadTexture("code/assets/textures/player1.jpg");
     GLuint playerTwoTextureID = loadTexture("code/assets/textures/player2.jpg");
-    GLuint winTextureID = loadTexture("code/assets/textures/win.jpg");
-    GLuint loseTextureID = loadTexture("code/assets/textures/lose.jpg");
 
     // Load score textures in an array
     GLuint zeroTextureID = loadTexture("code/assets/textures/0.jpg");
@@ -698,7 +696,9 @@ int main(int argc, char* argv[])
     GLuint thirtyTextureID = loadTexture("code/assets/textures/2.jpg");
     GLuint fortyTextureID = loadTexture("code/assets/textures/3.jpg");
     GLuint advantageTextureID = loadTexture("code/assets/textures/advantage.jpg");
-    GLuint scores[5] = { zeroTextureID, fifteenTextureID, thirtyTextureID, fortyTextureID, advantageTextureID };
+    GLuint winTextureID = loadTexture("code/assets/textures/win.jpg");
+    GLuint loseTextureID = loadTexture("code/assets/textures/lose.jpg");
+    GLuint scores[7] = { zeroTextureID, fifteenTextureID, thirtyTextureID, fortyTextureID, advantageTextureID, winTextureID, loseTextureID };
 
     // Load shaders
     string shaderPathPrefix = "code/assets/shaders/";
@@ -896,8 +896,8 @@ int main(int argc, char* argv[])
     vec3 zLightFocus(0.0, 0.0f, -1.0f);      // the point in 3D space the light "looks" at
 
     // Player colors, contains the possible colors for the player letter
-    vec3 playerColors[4][3] = { {vec3(0.0f, 0.0f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 1.0f)},
-                               {vec3(0.8235f, 0.0157f, 0.176f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.25f, 0.25f)},
+    vec3 playerColors[4][3] = {{vec3(0.8235f, 0.0157f, 0.176f), vec3(1.0f, 0.0f, 0.0f), vec3(1.0f, 0.25f, 0.25f)},
+                               {vec3(0.0f, 0.0f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, 1.0f, 1.0f)},
                                {vec3(1.0f, 1.0f, 0.25f), vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 0.753f, 0.0f)},
                                {vec3(0.059f, 1.0f, 0.314f), vec3(0.0f, 0.5f, 0.0f), vec3(0.18f, 0.545f, 0.341f)} };
 
@@ -951,7 +951,7 @@ int main(int argc, char* argv[])
 
         vec3 zLightPosition = vec3(0.0f, 5.0f, 30.0f); // the location of the light in 3D space
         vec3 zLightDirection = normalize(ballLocation - zLightPosition);
-        vec3 zSpotlightColor = vec3(1.0f, 1.0f, 0.0f);
+        vec3 zSpotlightColor = vec3(1.0f, 1.0f, 1.0f);
         SetUniformVec3(shaderScene, "zSpotLight_pos", zLightPosition);
         SetUniformVec3(shaderScene, "zSpotLight_dir", zLightDirection);
         SetUniformVec3(shaderScene, "zSpotLight_color", zSpotlightColor);
@@ -959,7 +959,7 @@ int main(int argc, char* argv[])
         vec3 yLightPosition = circleCamera; // the location of the y spotlight in 3D space
         vec3 yLightFocus = circleLookAt;      // the point in 3D space the spotlight "looks" at
         vec3 yLightDirection = normalize(yLightFocus - yLightPosition);
-        vec3 ySpotlightColor = vec3(1.0f, 1.0f, 0.0f); // Set the color of the spotlight to something different
+        vec3 ySpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
         SetUniformVec3(shaderScene, "ySpotLight_pos", yLightPosition);
         SetUniformVec3(shaderScene, "ySpotLight_dir", yLightDirection);
         SetUniformVec3(shaderScene, "ySpotLight_color", ySpotlightColor);
@@ -1167,7 +1167,14 @@ int main(int argc, char* argv[])
             mat4 lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
             lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
             lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-            lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+            lCharacter = translate(lCharacter, vec3(0.0f, 0.65f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+            SetUniformMat4(shaderShadow, "world_matrix", lCharacter);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+            lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
+            lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+            lCharacter = translate(lCharacter, vec3(0.0f, 0.45f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
             SetUniformMat4(shaderShadow, "world_matrix", lCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -1465,93 +1472,120 @@ int main(int argc, char* argv[])
         // Change transparency
         SetUniformfValue(shaderScene, "transparency", 0.4f);
 
-        // Draw the letter l, bound to player 1 position
-        mat4 lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        glBindTexture(GL_TEXTURE_2D, lTextureID);
-        lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
-        lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
-        SetUniformMat4(shaderScene, "world_matrix", lCharacter);
+        // Draw the letter P, bound to player 1 position
+        mat4 pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
+        pCharacter = rotate(pCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.55f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        lCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        lCharacter = lCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        lCharacter = rotate(lCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        lCharacter = translate(lCharacter, vec3(0.0f, 0.0f, -0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", lCharacter);
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerOne.centerOfRacket);
+        pCharacter = rotate(pCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.25f, -0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // Draw the letter i, bound to player 1 position
-        glBindTexture(GL_TEXTURE_2D, iTextureID);
-        mat4 iCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        iCharacter = iCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        iCharacter = rotate(iCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        iCharacter = translate(iCharacter, vec3(0.0f, 0.0f, 0.3f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", iCharacter);
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        pCharacter = rotate(pCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.0f, -0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        pCharacter = rotate(pCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.15f, -0.05f)) * scale(mat4(1.0f), vec3(0.2f, 0.4f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw the number 1, tied to player one position
+        mat4 oneCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        oneCharacter = oneCharacter * translate(mat4(1.0f), playerOneLoc) * translate(mat4(1.0f), playerOne.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        oneCharacter = rotate(oneCharacter, radians(armAngles[0][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        oneCharacter = translate(oneCharacter, vec3(0.0f, 0.0f, 0.3f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", oneCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[0][1]));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw the letter P, bound to player 2 position
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerTwo.centerOfRacket);
+        pCharacter = rotate(pCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.55f, 0.4f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
         SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // Draw the letter a, bound to player 2 position
-        glBindTexture(GL_TEXTURE_2D, aTextureID);
-        mat4 aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.2f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", aCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerTwo.centerOfRacket);
+        pCharacter = rotate(pCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.25f, 0.4f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.6f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", aCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        pCharacter = rotate(pCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.0f, 0.55f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 2.15f, 0.0f));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
-        SetUniformMat4(shaderScene, "world_matrix", aCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
+        pCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = pCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        pCharacter = rotate(pCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        pCharacter = translate(pCharacter, vec3(0.0f, 0.15f, 0.25f)) * scale(mat4(1.0f), vec3(0.2f, 0.4f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", pCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        aCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = aCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.8f, 0.0f));
-        aCharacter = rotate(aCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        aCharacter = translate(aCharacter, vec3(0.0f, 0.0f, 0.35f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
-        SetUniformMat4(shaderScene, "world_matrix", aCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[2][1]));
+        // Draw the number 2, bound to player 2 position
+        mat4 twoCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = twoCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        twoCharacter = rotate(twoCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = translate(twoCharacter, vec3(0.0f, 0.125f, -0.45f)) * scale(mat4(1.0f), vec3(0.2f, 0.45f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", twoCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // Draw the letter n, bound to player 2 position
-        glBindTexture(GL_TEXTURE_2D, nTextureID);
-        mat4 nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.55f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", nCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
+        twoCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = twoCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerTwo.centerOfRacket);
+        twoCharacter = rotate(twoCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = translate(twoCharacter, vec3(0.0f, 0.55f, -0.3f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", twoCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.35f));
-        nCharacter = rotate(nCharacter, radians(30.0f), vec3(1.0f, 0.0, 0.0)) * scale(mat4(1.0f), vec3(0.2f, 0.8f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", nCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
+        twoCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = twoCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerTwo.centerOfRacket);
+        twoCharacter = rotate(twoCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = translate(twoCharacter, vec3(0.0f, 0.275f, -0.3f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", twoCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        nCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = nCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
-        nCharacter = rotate(nCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
-        nCharacter = translate(nCharacter, vec3(0.0f, 0.0f, -0.1f)) * scale(mat4(1.0f), vec3(0.2f, 0.75f, 0.2f));
-        SetUniformMat4(shaderScene, "world_matrix", nCharacter);
-        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[3][1]));
+        twoCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = twoCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), vec3(0.0f, 1.6f, 0.0f)) * translate(mat4(1.0f), playerTwo.centerOfRacket);
+        twoCharacter = rotate(twoCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = translate(twoCharacter, vec3(0.0f, 0.0f, -0.3f)) * scale(mat4(1.0f), vec3(0.2f, 0.2f, 0.5f));
+        SetUniformMat4(shaderScene, "world_matrix", twoCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        twoCharacter = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = twoCharacter * translate(mat4(1.0f), playerTwoLoc) * translate(mat4(1.0f), playerTwo.centerOfRacket) * translate(mat4(1.0f), vec3(0.0f, 1.875f, 0.0f));
+        twoCharacter = rotate(twoCharacter, radians(armAngles[1][1] + 90.0f), vec3(0.0f, 1.0f, 0.0f));
+        twoCharacter = translate(twoCharacter, vec3(0.0f, -0.125f, -0.135f)) * scale(mat4(1.0f), vec3(0.2f, 0.45f, 0.2f));
+        SetUniformMat4(shaderScene, "world_matrix", twoCharacter);
+        SetUniformVec3(shaderScene, "object_color", vec3(playerColors[1][1]));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Retrun the transparency to 0
@@ -1624,7 +1658,7 @@ int main(int argc, char* argv[])
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         location = translate(mat4(1.0f), vec3(0.5f, 16.0f, 0.0f));
-        location = rotate(location, radians(-1.0f), vec3(0.0f, 0.0f, 1.0f));
+        location = rotate(location, radians(-10.0f), vec3(0.0f, 0.0f, 1.0f));
         worldMatrix = location * scoreBoardMatrix;
 
         // Draw the player 2 scoreboard all textures now need to be reversed
@@ -1740,24 +1774,50 @@ int main(int argc, char* argv[])
         {
             if (ballLocation.x < -35.5f)
             {
-                if (p2Score < 4)
+                if (p2Score < 3)
                 {
                     p2Score++;
                 }
                 else
                 {
-                    p2Score = 0;
+                    if ((p1Score == 3) & (p2Score == 3))
+                    {
+                        p2Score = 4;
+                    }
+                    else if (p1Score == 4)
+                    {
+                        p1Score = 3;
+                    }
+                    else
+                    {
+                        p1Score = 6;
+                        p2Score = 5;
+                        SoundEngine->play2D("code/assets/audio/airhorn.mp3", false);
+                    }
                 }
             }
             if (ballLocation.x > 35.5f)
             {
-                if (p1Score < 4)
+                if (p1Score < 3)
                 {
                     p1Score++;
                 }
                 else
                 {
-                    p1Score = 0;
+                    if ((p2Score == 3) & (p1Score == 3))
+                    {
+                        p1Score = 4;
+                    }
+                    else if (p2Score == 4)
+                    {
+                        p2Score = 3;
+                    }
+                    else
+                    {
+                        p2Score = 6;
+                        p1Score = 5;
+                        SoundEngine->play2D("code/assets/audio/airhorn.mp3", false);
+                    }
                 }
             }
             // Rerandomize starting movement
