@@ -136,6 +136,12 @@ void main()
 	// First calculate point light
 	vec3 light = scalar * calcPointLight(norm, fragment_position, viewDir, light_color);
 	
+	// Add P1 scoreboard spotlight
+	light += calcSpotLight(vec3(-30.0f, 16.0f, 0.0f), normalize(vec3(-0.5f, 16.0f, 0.0f) - vec3(-30.0f, 16.0f, 0.0f)), norm, fragment_position, viewDir, vec3(1.0f, 1.0f, 1.0f));
+	
+	// Add P2 scoreboard spotlight
+	light += calcSpotLight(vec3(30.0f, 16.0f, 0.0f), normalize(vec3(0.5f, 16.0f, 0.0f) - vec3(30.0f, 16.0f, 0.0f)), norm, fragment_position, viewDir, vec3(1.0f, 1.0f, 1.0f));
+	
 	// Then the spotlights
 	if (useSpotlightZ == 1)
 	{

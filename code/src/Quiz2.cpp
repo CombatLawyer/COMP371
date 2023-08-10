@@ -527,19 +527,6 @@ public:
     }
 };
 
-void drawScoreboard(GLuint shader, int p1Score, int p2Score)
-{
-    mat4 scoreBoardMatrix = scale(mat4(1.0f), vec3(0.2f, 3.0f, 5.0f));
-    mat4 location = translate(mat4(1.0f), vec3(-0.5f, 10.0f, 0.0f));
-    location = rotate(location, radians(30.0f), vec3(0.0f, 0.0f, 1.0f));
-
-    mat4 worldMatrix = location * scoreBoardMatrix;
-    // Draw the horizontal string
-    SetUniformMat4(shader, "world_matrix", worldMatrix);
-    SetUniformVec3(shader, "object_color", vec3(0.0f, 0.0f, 0.0f));
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-}
-
 GLuint loadTexture(const char* filename)
 {
     // Step1 Create and bind textures
@@ -669,7 +656,7 @@ int main(int argc, char* argv[])
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // Create Window and rendering context using GLFW, resolution is 1024x786
-    GLFWwindow* window = glfwCreateWindow(1024, 786, "Comp371 - Quiz 2", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1024, 786, "Comp371 - Galaxy Tennis", NULL, NULL);
     if (window == NULL)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -700,6 +687,18 @@ int main(int argc, char* argv[])
     GLuint tatooTextureID = loadTexture("code/assets/textures/tatoo.jpg");
     GLuint ropeTextureID = loadTexture("code/assets/textures/rope.jpg");
     GLuint tennisBallTextureID = loadTexture("code/assets/textures/tennisball.jpg");
+    GLuint playerOneTextureID = loadTexture("code/assets/textures/player1.jpg");
+    GLuint playerTwoTextureID = loadTexture("code/assets/textures/player2.jpg");
+    GLuint winTextureID = loadTexture("code/assets/textures/win.jpg");
+    GLuint loseTextureID = loadTexture("code/assets/textures/lose.jpg");
+
+    // Load score textures in an array
+    GLuint zeroTextureID = loadTexture("code/assets/textures/0.jpg");
+    GLuint fifteenTextureID = loadTexture("code/assets/textures/1.jpg");
+    GLuint thirtyTextureID = loadTexture("code/assets/textures/2.jpg");
+    GLuint fortyTextureID = loadTexture("code/assets/textures/3.jpg");
+    GLuint advantageTextureID = loadTexture("code/assets/textures/advantage.jpg");
+    GLuint scores[5] = { zeroTextureID, fifteenTextureID, thirtyTextureID, fortyTextureID, advantageTextureID };
 
     // Load shaders
     string shaderPathPrefix = "code/assets/shaders/";
@@ -875,6 +874,8 @@ int main(int argc, char* argv[])
     vec3 playerTwoLoc = vec3(16.0f, 1.3f, 0.0f);
     vec3 ballLocation = vec3(0.0f, 6.0f, 0.0f);
     vec3 ballColor = vec3(0.224f, 1.0f, 0.078f);
+    int p1Score = 0;
+    int p2Score = 0;
 
     float acceleration = 1.0f;
     // Randomize the initial direction the ball will move in
@@ -969,8 +970,8 @@ int main(int argc, char* argv[])
         SetUniformMat4(shaderScene, "light_view_proj_matrix", lightSpaceMatrix);
  
         // Set light cutoff angles on scene shader
-        float lightAngleOuter = 7.5f;
-        float lightAngleInner = 5.0f;
+        float lightAngleOuter = 15.0f;
+        float lightAngleInner = 10.0f;
         SetUniformfValue(shaderScene, "light_cutoff_inner", cos(radians(lightAngleInner)));
         SetUniformfValue(shaderScene, "light_cutoff_outer", cos(radians(lightAngleOuter)));
 
@@ -1241,8 +1242,6 @@ int main(int argc, char* argv[])
             SetUniformMat4(shaderShadow, "world_matrix", nCharacter);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
-        drawScoreboard(shaderShadow, 0, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1562,7 +1561,139 @@ int main(int argc, char* argv[])
         // Retrun the transparency to 0
         SetUniformfValue(shaderScene, "transparency", 1.0f);
 
-        drawScoreboard(shaderScene, 0, 0);
+        mat4 scoreBoardMatrix = scale(mat4(1.0f), vec3(0.2f, 6.0f, 10.0f));
+        mat4 location = translate(mat4(1.0f), vec3(-0.5f, 16.0f, 0.0f));
+        location = rotate(location, radians(10.0f), vec3(0.0f, 0.0f, 1.0f));
+
+        mat4 worldMatrix = location * scoreBoardMatrix;
+
+        // Draw the player 1 scoreboard
+        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        mat4 scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 3.0f, 3.0f));
+        mat4 scorePosition = translate(location, vec3(0.0f, -1.0f, -3.0f));
+        scorePosition = rotate(scorePosition, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 3.0f, 3.0f));
+        scorePosition = translate(location, vec3(0.0f, -1.0f, 3.0f));
+        scorePosition = rotate(scorePosition, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 0.25f, 1.5f));
+        scorePosition = translate(location, vec3(0.0f, -1.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 1.5f, 1.5f));
+        scorePosition = translate(location, vec3(0.0f, 2.0f, 3.0f));
+        scorePosition = rotate(scorePosition, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, playerTwoTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 1.5f, 1.5f));
+        scorePosition = translate(location, vec3(0.0f, 2.0f, -3.0f));
+        scorePosition = rotate(scorePosition, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, playerOneTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        location = translate(mat4(1.0f), vec3(0.5f, 16.0f, 0.0f));
+        location = rotate(location, radians(-1.0f), vec3(0.0f, 0.0f, 1.0f));
+        worldMatrix = location * scoreBoardMatrix;
+
+        // Draw the player 2 scoreboard all textures now need to be reversed
+        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 3.0f, 3.0f));
+        scorePosition = translate(location, vec3(0.0f, -1.0f, -3.0f));
+        scorePosition = rotate(scorePosition, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+        scorePosition = rotate(scorePosition, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 3.0f, 3.0f));
+        scorePosition = translate(location, vec3(0.0f, -1.0f, 3.0f));
+        scorePosition = rotate(scorePosition, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+        scorePosition = rotate(scorePosition, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 0.25f, 1.5f));
+        scorePosition = translate(location, vec3(0.0f, -1.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 1.5f, 1.5f));
+        scorePosition = translate(location, vec3(0.0f, 2.0f, 3.0f));
+        scorePosition = rotate(scorePosition, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+        scorePosition = rotate(scorePosition, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, playerOneTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 1.5f, 1.5f));
+        scorePosition = translate(location, vec3(0.0f, 2.0f, -3.0f));
+        scorePosition = rotate(scorePosition, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+        scorePosition = rotate(scorePosition, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+
+        worldMatrix = scorePosition * scoreTextureMatrix;
+
+        glBindTexture(GL_TEXTURE_2D, playerTwoTextureID);
+        SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
+        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        glDrawArrays(GL_TRIANGLES, 0, 36);;
 
         //begin drawing the skybox
         GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
@@ -1611,6 +1742,28 @@ int main(int argc, char* argv[])
         }
         if ((ballLocation.x < -35.5f) | (ballLocation.x > 35.5f))
         {
+            if (ballLocation.x < -35.5f)
+            {
+                if (p2Score < 4)
+                {
+                    p2Score++;
+                }
+                else
+                {
+                    p2Score = 0;
+                }
+            }
+            if (ballLocation.x > 35.5f)
+            {
+                if (p1Score < 4)
+                {
+                    p1Score++;
+                }
+                else
+                {
+                    p1Score = 0;
+                }
+            }
             // Rerandomize starting movement
             srand(time(0));
             if (rand() % 2 == 1)
