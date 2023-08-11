@@ -680,7 +680,7 @@ int main(int argc, char* argv[])
     GLuint glossTextureID = loadTexture("code/assets/textures/gloss.jpg");
     GLuint whiteTextureID = loadTexture("code/assets/textures/white.jpg");
     GLuint lTextureID = loadTexture("code/assets/textures/water.jpg");
-    GLuint iTextureID = loadTexture("code/assets/textures/fire.jpg");
+    GLuint fireTextureID = loadTexture("code/assets/textures/fire.jpg");
     GLuint aTextureID = loadTexture("code/assets/textures/lightning.jpg");
     GLuint nTextureID = loadTexture("code/assets/textures/grass.jpg");
     GLuint metalicTextureID = loadTexture("code/assets/textures/metal.jpg");
@@ -705,9 +705,11 @@ int main(int argc, char* argv[])
     GLuint shaderScene = loadSHADER(shaderPathPrefix + "scene_vertex.glsl", shaderPathPrefix + "scene_fragment.glsl");
     GLuint shaderShadow = loadSHADER(shaderPathPrefix + "shadow_vertex.glsl", shaderPathPrefix + "shadow_fragment.glsl");
     GLuint shaderSkybox = loadSHADER(shaderPathPrefix + "skybox_vertex.glsl", shaderPathPrefix + "skybox_fragment.glsl");
+    GLuint shaderParticles = loadSHADER(shaderPathPrefix + "particle_vertex.glsl", shaderPathPrefix + "particle_fragment.glsl");
 
     // Begin music
     ISoundEngine* SoundEngine = createIrrKlangDevice();
+    // Lady of the 80's done by Grand_Project royalty free music
     SoundEngine->play2D("code/assets/audio/themeSong.mp3", true);
 
     // Used to trigger specific flags in the scene shader
@@ -910,10 +912,10 @@ int main(int argc, char* argv[])
     bool sideCamera = false;
 
     // Setup 3d models (lab 8)
-    string fenceModel = "code/assets/3dModels/fence.obj";
-    string stickFigModel = "code/assets/3dModels/stickFig.obj";
-    string starModel = "code/assets/3dModels/star.obj";
-    string natureModel = "code/assets/3dModels/tree.obj";
+    string fenceModel = "code/assets/3dModels/fence.obj"; // https://free3d.com/3d-model/steel-railing-63774.html
+    string stickFigModel = "code/assets/3dModels/stickFig.obj"; // https://free3d.com/3d-model/rigged-stick-figure-43707.html
+    string starModel = "code/assets/3dModels/star.obj"; // https://free3d.com/3d-model/star-mobile-ready-60-tris-49986.html
+    string natureModel = "code/assets/3dModels/tree.obj"; // https://free3d.com/3d-model/low_poly_tree-816203.html
 
     // 3d models vertices (lab 8)
     int fenceVertices;
@@ -1331,7 +1333,7 @@ int main(int argc, char* argv[])
         // ================================================================ //
        
         glBindVertexArray(fenceVAO);    // bind
-        glBindTexture(GL_TEXTURE_2D, iTextureID);   // set fence texture
+        glBindTexture(GL_TEXTURE_2D, fireTextureID);   // set fence texture
 
         // "left" fence
         mat4 fenceLeft = translate(mat4(1.0f), vec3(0.0f, 0.0f, 30.0f))*
