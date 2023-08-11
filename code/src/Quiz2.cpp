@@ -911,12 +911,21 @@ int main(int argc, char* argv[])
 
     // Setup 3d models (lab 8)
     string fenceModel = "code/assets/3dModels/fence.obj";
+    string stickFigModel = "code/assets/3dModels/stickFig.obj";
+    string starModel = "code/assets/3dModels/star.obj";
+    string natureModel = "code/assets/3dModels/tree.obj";
 
     // 3d models vertices (lab 8)
     int fenceVertices;
+    int stickFigVertices;
+    int starVertices;
+    int natureVertices;
 
     // setup VBO (lab 8)
     GLuint fenceVAO = setupModelVBO(fenceModel, fenceVertices);
+    GLuint stickFigVAO = setupModelVBO(stickFigModel, stickFigVertices);
+    GLuint starVAO = setupModelVBO(starModel, starVertices);
+    GLuint natureVAO = setupModelVBO(natureModel, natureVertices);
 
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
@@ -1002,7 +1011,7 @@ int main(int argc, char* argv[])
             // ================================================================ //
 
             glBindVertexArray(fenceVAO);    // bind
-            //glBindTexture(GL_TEXTURE_2D, whiteTextureID);   // set fence texture
+            //glBindTexture(GL_TEXTURE_2D, whiteTextureID);   // set texture
 
             // "left" fence
             mat4 fenceLeft = translate(mat4(1.0f), vec3(0.0f, 0.0f, 30.0f)) *
@@ -1030,6 +1039,47 @@ int main(int argc, char* argv[])
             SetUniformMat4(shaderShadow, "world_matrix", fenceFront);
             glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
 
+            glBindVertexArray(stickFigVAO);    // bind
+            // "front" stick fig
+            for (float i = 0.0f; i < 5.0f; i++) {
+                mat4 stickFigFront = translate(mat4(1.0f), vec3(55.0f, 0.0f, -30.0f + (i * 15.0f))) *
+                    rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                    scale(mat4(1.0f), vec3(0.15f, 0.15f, 0.15f));
+                SetUniformMat4(shaderShadow, "world_matrix", stickFigFront);
+                glDrawArrays(GL_TRIANGLES, 0, stickFigVertices);
+            }
+
+            // "back" stick fig
+            for (float i = 0.0f; i < 5.0f; i++) {
+                mat4 stickFigBack = translate(mat4(1.0f), vec3(-55.0f, 0.0f, -30.0f + (i * 15.0f))) *
+                    rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                    scale(mat4(1.0f), vec3(0.15f, 0.15f, 0.15f));
+                SetUniformMat4(shaderShadow, "world_matrix", stickFigBack);
+                glDrawArrays(GL_TRIANGLES, 0, stickFigVertices);
+            }
+
+            // star
+            glBindVertexArray(starVAO);    // bind
+            mat4 star = translate(mat4(1.0f), vec3(-70.0f, 50.0f, -55.0f)) *
+                rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 0.0f, 1.0f)) *
+                scale(mat4(1.0f), vec3(3.1f, 5.1f, 3.1f));
+            SetUniformMat4(shaderShadow, "world_matrix", star);
+            glDrawArrays(GL_TRIANGLES, 0, starVertices);
+
+            glBindVertexArray(natureVAO);    // bind
+            // nature - player 1, blue tree
+            mat4 natureP1 = translate(mat4(1.0f), vec3(60.0f, 0.0f, -45.0f)) *
+                rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                scale(mat4(1.0f), vec3(1.6f, 1.6f, 1.6f));
+            SetUniformMat4(shaderShadow, "world_matrix", natureP1);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, natureVertices);
+
+            // nature - player 2, red tree
+            mat4 natureP2 = translate(mat4(1.0f), vec3(-60.0f, 0.0f, 45.0f)) *
+                //rotate(mat4(1.0f), glm::radians(100.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                scale(mat4(1.0f), vec3(1.6f, 1.6f, 1.6f));
+            SetUniformMat4(shaderShadow, "world_matrix", natureP2);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, natureVertices);
 
             //Draw tennis ball
             glBindVertexArray(sphereVAO);
@@ -1312,6 +1362,59 @@ int main(int argc, char* argv[])
         SetUniformMat4(shaderScene, "world_matrix", fenceFront);
         SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, fenceVertices);
+
+        glBindVertexArray(stickFigVAO);    // bind
+        glBindTexture(GL_TEXTURE_2D, ropeTextureID);   // set texture
+        // "front" stick fig
+        for (float i = 0.0f; i < 5.0f; i++) {
+            mat4 stickFigFront = translate(mat4(1.0f), vec3(55.0f, 0.0f, -30.0f + (i*15.0f))) *
+                rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                scale(mat4(1.0f), vec3(0.15f, 0.15f, 0.15f));
+            SetUniformMat4(shaderScene, "world_matrix", stickFigFront);
+            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+            glDrawArrays(GL_TRIANGLES, 0, stickFigVertices);
+        }
+
+        // "back" stick fig
+        for (float i = 0.0f; i < 5.0f; i++) {
+            mat4 stickFigBack = translate(mat4(1.0f), vec3(-55.0f, 0.0f, -30.0f + (i * 15.0f))) *
+                rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+                scale(mat4(1.0f), vec3(0.15f, 0.15f, 0.15f));
+            SetUniformMat4(shaderScene, "world_matrix", stickFigBack);
+            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+            glDrawArrays(GL_TRIANGLES, 0, stickFigVertices);
+        }
+
+        // star
+        glBindVertexArray(starVAO);    // bind
+        glBindTexture(GL_TEXTURE_2D, tennisBallTextureID);   // set texture
+        mat4 star = translate(mat4(1.0f), vec3(-70.0f, 50.0f, -55.0f)) *
+            rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 0.0f, 1.0f)) *
+            scale(mat4(1.0f), vec3(3.1f, 5.1f, 3.1f));
+        SetUniformMat4(shaderScene, "world_matrix", star);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, starVertices);
+
+        glBindVertexArray(natureVAO);    // bind
+        // nature - player 1, blue tree
+        //glBindTexture(GL_TEXTURE_2D, playerOneTextureID);   // set texture - red
+        glBindTexture(GL_TEXTURE_2D, playerTwoTextureID);   // set texture - blue
+        mat4 natureP1 = translate(mat4(1.0f), vec3(60.0f, 0.0f, -45.0f)) *
+            rotate(mat4(1.0f), glm::radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) *
+            scale(mat4(1.0f), vec3(1.6f, 1.6f, 1.6f));
+        SetUniformMat4(shaderScene, "world_matrix", natureP1);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, natureVertices);
+
+        // nature - player 2, red tree
+        //glBindTexture(GL_TEXTURE_2D, playerTwoTextureID);   // set texture - blue
+        glBindTexture(GL_TEXTURE_2D, playerOneTextureID);   // set texture - red
+        mat4 natureP2 = translate(mat4(1.0f), vec3(-60.0f, 0.0f, 45.0f)) *
+            //rotate(mat4(1.0f), glm::radians(100.0f), vec3(0.0f, 1.0f, 0.0f)) *
+            scale(mat4(1.0f), vec3(1.6f, 1.6f, 1.6f));
+        SetUniformMat4(shaderScene, "world_matrix", natureP2);
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, natureVertices);
 
         // Draw tennis ball
         glBindVertexArray(sphereVAO);
