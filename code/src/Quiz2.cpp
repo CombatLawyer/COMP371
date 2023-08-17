@@ -858,6 +858,8 @@ int main(int argc, char* argv[])
     float worldXAngle = 0.0f;
     float worldYAngle = 0.0f;
 
+    bool paused = false;
+
     // Default rendering mode
     GLenum renderMode = GL_TRIANGLES;
 
@@ -866,6 +868,7 @@ int main(int argc, char* argv[])
     int previousBstate = GLFW_RELEASE;
     int previousNstate = GLFW_RELEASE;
     int previousMstate = GLFW_RELEASE;
+    int previousRstate = GLFW_RELEASE;
 
     // Player poisition reference and initial positions
     vec3* playerPosition = NULL;
@@ -944,6 +947,11 @@ int main(int argc, char* argv[])
         double dt = glfwGetTime() - lastFrameTime;
         lastFrameTime += dt;
 
+        if (paused)
+        {
+            dt = 0;
+        }
+
         mat4 lightProjectionMatrix = perspective(radians(90.0f), (float)DEPTH_MAP_TEXTURE_SIZE / (float)DEPTH_MAP_TEXTURE_SIZE, lightNearPlane, lightFarPlane);
         mat4 lightViewMatrix = lookAt(lightPosition, pointLightFocus, vec3(0.0f, 0.0f, 1.0f));
         mat4 lightSpaceMatrix = lightProjectionMatrix * lightViewMatrix;
@@ -975,29 +983,20 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "ballSpotLight_dir", ballLightDirection);
         SetUniformVec3(shaderScene, "ballSpotLight_color", ballSpotlightColor);
 
-        vec3 y1LightPosition = vec3(-18.0f, 30.0f, 0.0f); // the location of the y spotlight in 3D space
-        vec3 y1LightFocus = playerOneLoc;      // the point in 3D space the spotlight "looks" at
-        vec3 y1LightDirection = normalize(y1LightFocus - y1LightPosition);
-        vec3 y1SpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
-        SetUniformVec3(shaderScene, "y1SpotLight_pos", y1LightPosition);
-        SetUniformVec3(shaderScene, "y1SpotLight_dir", y1LightDirection);
-        SetUniformVec3(shaderScene, "y1SpotLight_color", y1SpotlightColor);
-
-        vec3 y2LightPosition = vec3(18.0f, 30.0f, 0.0f); // the location of the y spotlight in 3D space
-        vec3 y2LightFocus = playerTwoLoc;      // the point in 3D space the spotlight "looks" at
-        vec3 y2LightDirection = normalize(y2LightFocus - y2LightPosition);
-        vec3 y2SpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
-        SetUniformVec3(shaderScene, "y2SpotLight_pos", y2LightPosition);
-        SetUniformVec3(shaderScene, "y2SpotLight_dir", y2LightDirection);
-        SetUniformVec3(shaderScene, "y2SpotLight_color", y2SpotlightColor);
+        vec3 yLightPosition = vec3((*playerPosition).x, 20.0f, (*playerPosition).z); // the location of the y spotlight in 3D space
+        vec3 yLightDirection = normalize((*playerPosition) - yLightPosition);
+        vec3 ySpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
+        SetUniformVec3(shaderScene, "ySpotLight_pos", yLightPosition);
+        SetUniformVec3(shaderScene, "ySpotLight_dir", yLightDirection);
+        SetUniformVec3(shaderScene, "ySpotLight_color", ySpotlightColor);
 
         // Set light space matrix on both shaders
         SetUniformMat4(shaderShadow, "light_view_proj_matrix", lightSpaceMatrix);
         SetUniformMat4(shaderScene, "light_view_proj_matrix", lightSpaceMatrix);
  
         // Set light cutoff angles on scene shader
-        float lightAngleOuter = 15.0f;
-        float lightAngleInner = 10.0f;
+        float lightAngleOuter = 25.0f;
+        float lightAngleInner = 20.0f;
         SetUniformfValue(shaderScene, "light_cutoff_inner", cos(radians(lightAngleInner)));
         SetUniformfValue(shaderScene, "light_cutoff_outer", cos(radians(lightAngleOuter)));
 
@@ -1537,19 +1536,19 @@ int main(int argc, char* argv[])
         mat4 netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, -19.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
-        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, 19.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
-        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         netPost = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         netPost = netPost * translate(mat4(1.0f), vec3(0.0f, 2.0f, 0.0f)) * scale(mat4(1.0f), vec3(0.2f, 4.0f, 0.2f));
         SetUniformMat4(shaderScene, "world_matrix", netPost);
-        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+        SetUniformVec3(shaderScene, "object_color", vec3(0.5f, 0.5f, 0.5f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Now draw the net
@@ -1731,7 +1730,7 @@ int main(int argc, char* argv[])
 
         glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
         SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 3.0f, 3.0f));
@@ -1742,7 +1741,7 @@ int main(int argc, char* argv[])
 
         glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
         SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 0.25f, 1.5f));
@@ -1796,7 +1795,7 @@ int main(int argc, char* argv[])
 
         glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
         SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 3.0f, 3.0f));
@@ -1808,7 +1807,7 @@ int main(int argc, char* argv[])
 
         glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
         SetUniformMat4(shaderScene, "world_matrix", worldMatrix);
-        SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
+        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         scoreTextureMatrix = scale(mat4(1.0f), vec3(0.4f, 0.25f, 1.5f));
@@ -1941,6 +1940,7 @@ int main(int argc, char* argv[])
                         p1Score = 6;
                         p2Score = 5;
                         SoundEngine->play2D("code/assets/audio/airhorn.mp3", false);
+                        paused = true;
                     }
                 }
             }
@@ -1969,6 +1969,7 @@ int main(int argc, char* argv[])
                         p2Score = 6;
                         p1Score = 5;
                         SoundEngine->play2D("code/assets/audio/airhorn.mp3", false);
+                        paused = true;
                     }
                 }
             }
@@ -2002,8 +2003,8 @@ int main(int argc, char* argv[])
                 SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
 
                 // player 1's side 
-                mat4 p1 = translate(center_1, vec3(0.0f, -1.0f, -3.0f)) * scoreTextureMatrix;
-                mat4 p2 = translate(center_1, vec3(0.0f, -1.0f, 3.0f)) * scoreTextureMatrix;
+                mat4 p1 = translate(center_1, vec3(0.0f, -1.0f, -3.0f)) * scale(mat4(1.0f), vec3(0.0f, 1.5f, 1.5f));
+                mat4 p2 = translate(center_1, vec3(0.0f, -1.0f, 3.0f)) * scale(mat4(1.0f), vec3(0.0f, 1.5f, 1.5f));
 
                 // rotate only 90 on x axis for player 1's view of score pop up
                 p1 = rotate(p1, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
@@ -2038,9 +2039,10 @@ int main(int argc, char* argv[])
             }
             else
             {
+                SetUniformfValue(shaderScene, "transparency", alpha);
                 // now draw on other side for p2 side
-                mat4 p1 = translate(center_2, vec3(0.0f, -1.0f, 3.0f)) * scoreTextureMatrix;
-                mat4 p2 = translate(center_2, vec3(0.0f, -1.0f, -3.0f)) * scoreTextureMatrix;
+                mat4 p1 = translate(center_2, vec3(0.0f, -1.0f, 3.0f)) * scale(mat4(1.0f), vec3(0.0f, 1.5f, 1.5f));
+                mat4 p2 = translate(center_2, vec3(0.0f, -1.0f, -3.0f)) * scale(mat4(1.0f), vec3(0.0f, 1.5f, 1.5f));
 
                 // make opposite rotation on x -axis and flip 180 on y axis for player 2's pop ups
                 p1 = rotate(p1, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
@@ -2075,11 +2077,14 @@ int main(int argc, char* argv[])
                     glDrawArrays(GL_TRIANGLES, 0, 36);
                 }
             }
-            frames++;
-            alpha -= 1.0f/100;
+            if (!paused)
+            {
+                frames++;
+                alpha -= 1.0f / 100 * (dt / dt);
+            }
         }
          
-         SetUniformfValue(shaderScene, "transparency", 1.0f);
+        SetUniformfValue(shaderScene, "transparency", 1.0f);
          
         //begin drawing the skybox
         GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
@@ -2226,6 +2231,12 @@ int main(int argc, char* argv[])
                 armAngles[1][1] = 60.0f;
             }
         }
+
+        if (previousRstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) // R - Pause or unpause the game
+        {
+            paused = !paused;
+        }
+        previousRstate = glfwGetKey(window, GLFW_KEY_R);
 
         // Arrow keys
         if ((glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)) // Left arrow
@@ -2466,12 +2477,12 @@ int main(int argc, char* argv[])
             }
         }
 
-        /*
-        if (p1Score > 4) // if one side has won, enter an infinite loop until R is pressed to start again.
+        
+        if (p1Score > 4 && !paused) // if one side has won, and the game is unpasued then restart the game
         {
             p1Score = 0;
             p2Score = 0;
-        }*/
+        }
 
         glfwGetCursorPos(window, &lastMousePosX, &lastMousePosY);
         if (sideCamera) 
@@ -2485,6 +2496,7 @@ int main(int argc, char* argv[])
 
                 // 10 from players position
                 flashPosition = cameraPosition + vec3(10.0f, 0.0f, 0.0f);
+
                 // Change the lookAt
                 cameraLookAt = vec3(15.0f, -1.0f, 0.0f);
             }

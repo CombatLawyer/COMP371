@@ -11,12 +11,9 @@ uniform vec3 ballSpotLight_pos;
 uniform vec3 ballSpotLight_dir;
 uniform vec3 ballSpotLight_color;
 
-uniform vec3 y1SpotLight_pos;
-uniform vec3 y1SpotLight_dir;
-uniform vec3 y1SpotLight_color;
-uniform vec3 y2SpotLight_pos;
-uniform vec3 y2SpotLight_dir;
-uniform vec3 y2SpotLight_color;
+uniform vec3 ySpotLight_pos;
+uniform vec3 ySpotLight_dir;
+uniform vec3 ySpotLight_color;
 
 uniform vec3 object_color;
 
@@ -152,8 +149,7 @@ void main()
 	}
 	if (useSpotlightY == 1)
 	{
-		light += calcSpotLight(y1SpotLight_pos, y1SpotLight_dir, norm, fragment_position, viewDir, y1SpotLight_color);
-		light += calcSpotLight(y2SpotLight_pos, y2SpotLight_dir, norm, fragment_position, viewDir, y2SpotLight_color);
+		light += calcSpotLight(ySpotLight_pos, ySpotLight_dir, norm, fragment_position, viewDir, ySpotLight_color);
 	}
     
 	if (useTexture == 0)
