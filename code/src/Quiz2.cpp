@@ -705,7 +705,6 @@ int main(int argc, char* argv[])
     GLuint shaderScene = loadSHADER(shaderPathPrefix + "scene_vertex.glsl", shaderPathPrefix + "scene_fragment.glsl");
     GLuint shaderShadow = loadSHADER(shaderPathPrefix + "shadow_vertex.glsl", shaderPathPrefix + "shadow_fragment.glsl");
     GLuint shaderSkybox = loadSHADER(shaderPathPrefix + "skybox_vertex.glsl", shaderPathPrefix + "skybox_fragment.glsl");
-    GLuint shaderParticles = loadSHADER(shaderPathPrefix + "particle_vertex.glsl", shaderPathPrefix + "particle_fragment.glsl");
 
     // Begin music
     ISoundEngine* SoundEngine = createIrrKlangDevice();
@@ -721,9 +720,9 @@ int main(int argc, char* argv[])
     GLint p_shadowArray[1]{};
     GLint* currentShadowValue = p_shadowArray;
 
-    GLuint zSpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightZ"); // Determines if the spotlight infront of the model is turned on
+    GLuint ballSpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightBall"); // Determines if the spotlight infront of the model is turned on
     GLint p_zSpotlightArray[1]{};
-    GLint* currentZSpotlightValue = p_zSpotlightArray;
+    GLint* currentBallSpotlightValue = p_zSpotlightArray;
 
     GLuint ySpotlightFlag = glGetUniformLocation(shaderScene, "useSpotlightY"); // Determines if the spotlight fixed above on the y axis is turned on
     GLint p_ySpotlightArray[1]{};
@@ -879,6 +878,7 @@ int main(int argc, char* argv[])
     int p2Score = 0;
 
     float acceleration = 1.0f;
+    bool playerOneActive;
     // Randomize the initial direction the ball will move in
     srand(time(0));
     float xdir;
@@ -886,12 +886,14 @@ int main(int argc, char* argv[])
     {
         xdir = ((rand() % 3) + 3.0f) / 10;
         playerPosition = (&playerTwoLoc);
+        playerOneActive = false;
         
     }
     else
     {
         xdir = -((rand() % 3) + 3.0f) / 10;
         playerPosition = (&playerOneLoc);
+        playerOneActive = true;
     }
     float ydir = 0.0f;
     float zdir = ((rand() % 10) - 5.0f) / 10;
@@ -929,12 +931,12 @@ int main(int argc, char* argv[])
     GLuint starVAO = setupModelVBO(starModel, starVertices);
     GLuint natureVAO = setupModelVBO(natureModel, natureVertices);
 
-     //variables for "score" animation
-   
+    //variables for "score" animation
     int  frames = 0; //display "text of score" for some frames
-    float alpha = 0.0f; //controls invisibility of score popping up in the center
+    float alpha = 1.0f; //controls invisibility of score popping up in the center
     vec3 flashPosition;
     vec3 flashPosition_2;
+
     // Entering Main Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -966,20 +968,28 @@ int main(int argc, char* argv[])
         ballLocation.y += ydir * dt * 5.0f * acceleration;
         ballLocation.z += zdir * dt * 5.0f * acceleration;
 
-        vec3 zLightPosition = vec3(0.0f, 5.0f, 30.0f); // the location of the light in 3D space
-        vec3 zLightDirection = normalize(ballLocation - zLightPosition);
-        vec3 zSpotlightColor = vec3(1.0f, 1.0f, 1.0f);
-        SetUniformVec3(shaderScene, "zSpotLight_pos", zLightPosition);
-        SetUniformVec3(shaderScene, "zSpotLight_dir", zLightDirection);
-        SetUniformVec3(shaderScene, "zSpotLight_color", zSpotlightColor);
+        vec3 ballLightPosition = vec3(ballLocation.x, 30.0f, ballLocation.z); // the location of the light in 3D space, will follow the ball from above
+        vec3 ballLightDirection = normalize(ballLocation - ballLightPosition);
+        vec3 ballSpotlightColor = vec3(1.0f, 1.0f, 1.0f);
+        SetUniformVec3(shaderScene, "ballSpotLight_pos", ballLightPosition);
+        SetUniformVec3(shaderScene, "ballSpotLight_dir", ballLightDirection);
+        SetUniformVec3(shaderScene, "ballSpotLight_color", ballSpotlightColor);
 
-        vec3 yLightPosition = circleCamera; // the location of the y spotlight in 3D space
-        vec3 yLightFocus = circleLookAt;      // the point in 3D space the spotlight "looks" at
-        vec3 yLightDirection = normalize(yLightFocus - yLightPosition);
-        vec3 ySpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
-        SetUniformVec3(shaderScene, "ySpotLight_pos", yLightPosition);
-        SetUniformVec3(shaderScene, "ySpotLight_dir", yLightDirection);
-        SetUniformVec3(shaderScene, "ySpotLight_color", ySpotlightColor);
+        vec3 y1LightPosition = vec3(-18.0f, 30.0f, 0.0f); // the location of the y spotlight in 3D space
+        vec3 y1LightFocus = playerOneLoc;      // the point in 3D space the spotlight "looks" at
+        vec3 y1LightDirection = normalize(y1LightFocus - y1LightPosition);
+        vec3 y1SpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
+        SetUniformVec3(shaderScene, "y1SpotLight_pos", y1LightPosition);
+        SetUniformVec3(shaderScene, "y1SpotLight_dir", y1LightDirection);
+        SetUniformVec3(shaderScene, "y1SpotLight_color", y1SpotlightColor);
+
+        vec3 y2LightPosition = vec3(18.0f, 30.0f, 0.0f); // the location of the y spotlight in 3D space
+        vec3 y2LightFocus = playerTwoLoc;      // the point in 3D space the spotlight "looks" at
+        vec3 y2LightDirection = normalize(y2LightFocus - y2LightPosition);
+        vec3 y2SpotlightColor = vec3(1.0f, 1.0f, 1.0f); // Set the color of the spotlight to something different
+        SetUniformVec3(shaderScene, "y2SpotLight_pos", y2LightPosition);
+        SetUniformVec3(shaderScene, "y2SpotLight_dir", y2LightDirection);
+        SetUniformVec3(shaderScene, "y2SpotLight_color", y2SpotlightColor);
 
         // Set light space matrix on both shaders
         SetUniformMat4(shaderShadow, "light_view_proj_matrix", lightSpaceMatrix);
@@ -1426,7 +1436,7 @@ int main(int argc, char* argv[])
 
         // Draw tennis ball
         glBindVertexArray(sphereVAO);
-        glBindTexture(GL_TEXTURE_2D, tennisBallTextureID);
+        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
         mat4 sphereSize = scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
         mat4 sphereMatrix = translate(mat4(1.0f), ballLocation);
         sphereMatrix = sphereMatrix * sphereSize;
@@ -1437,7 +1447,6 @@ int main(int argc, char* argv[])
         glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(vao);
-        glBindTexture(GL_TEXTURE_2D, whiteTextureID);
         // Draw X axis, colored red
         mat4 xAxis = rotate(mat4(1.0), radians(worldXAngle), vec3(1.0f, 0.0f, 0.0f)) * rotate(mat4(1.0), radians(worldYAngle), vec3(0.0f, 1.0f, 0.0f));
         xAxis = xAxis * translate(mat4(1.0f), vec3(2.5f, 0.0f, 0.0f)) * scale(mat4(1.0f), vec3(5.0f, 0.1f, 0.1f));
@@ -1836,153 +1845,40 @@ int main(int argc, char* argv[])
         SetUniformVec3(shaderScene, "object_color", vec3(0.184f, 0.310f, 0.310f));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-
-
         mat4 center_1 = translate(mat4(1.0f), flashPosition); // center on p1 side
 
         mat4 center_2 = translate(mat4(1.0f), flashPosition_2); //center on p2 side
-
-        
-        // player 1 tag 
-       
+              
         //size of names displayed
-        mat4 size_nametag = scale(mat4(1.0f), vec3(0.3f, 2.0f, 5.0f));
+        mat4 size_nametag = scale(mat4(1.0f), vec3(0.0f, 2.0f, 5.0f));
 
         //move name tag to corner and "closer" to the camera. Scale so that it looks like a game tag
-        mat4 p1_nametag = translate(center_1, vec3(-2.0f, 5.0f, -5.0f))  * size_nametag;
-
-        // rotate only 90 on x axis for player 1's view of score pop up
-        p1_nametag = rotate(p1_nametag, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
-
-
-        glBindTexture(GL_TEXTURE_2D, playerOneTextureID);
-        SetUniformMat4(shaderScene, "world_matrix", p1_nametag);
-        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        mat4 p1_nametag = translate(center_1, vec3(-2.0f, 5.0f, -5.0f)) * size_nametag;
 
         // have to reverse the x and z values so that its from player 2's side point of view.
         mat4 p2_nametag = translate(center_2, vec3(2.0f, 5.0f, 5.0f)) * size_nametag;
 
-        // rotate only 90 on x axis for player 1's view of score pop up
-        
-        p2_nametag = rotate(p2_nametag, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
-        p2_nametag = rotate(p2_nametag, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
-
-        glBindTexture(GL_TEXTURE_2D, playerTwoTextureID);
-        SetUniformMat4(shaderScene, "world_matrix", p2_nametag);
-        SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-
-         if (frames < 100) {
-             alpha = 1.0f;
-            SetUniformfValue(shaderScene, "transparency", alpha);
-            glBindTexture(GL_TEXTURE_2D, whiteTextureID);
-            
-
-            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-
-            // player 1's side 
-            mat4 p1 = translate(center_1, vec3(0.0f, -1.0f, -3.0f)) * scoreTextureMatrix;
-            mat4 p2 = translate(center_1, vec3(0.0f, -1.0f, 3.0f)) * scoreTextureMatrix;
-
+        if (playerOneActive)
+        {
             // rotate only 90 on x axis for player 1's view of score pop up
-            p1 = rotate(p1, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+            p1_nametag = rotate(p1_nametag, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 
-
-            glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
-            SetUniformMat4(shaderScene, "world_matrix", p1);
+            glBindTexture(GL_TEXTURE_2D, playerOneTextureID);
+            SetUniformMat4(shaderScene, "world_matrix", p1_nametag);
             SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
             glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-
-            p2 = rotate(p2, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
-
-
-            glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
-            SetUniformMat4(shaderScene, "world_matrix", p2);
-            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            mat4 p1_result = translate(p1_nametag, vec3(0.0f, 0.0f, 1.0f));
-            //display player 1 wins
-            if (p1Score == 5) {
-                glBindTexture(GL_TEXTURE_2D, scores[5]);
-                SetUniformMat4(shaderScene, "world_matrix", p1_result);
-                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-            //loses
-            if (p1Score == 6) {
-                glBindTexture(GL_TEXTURE_2D, scores[6]);
-                SetUniformMat4(shaderScene, "world_matrix", p1_result);
-                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-
-
-           
-   // now draw on other side for p2 side
-            p1 = translate(center_2, vec3(0.0f, -1.0f, 3.0f)) * scoreTextureMatrix;
-            p2 = translate(center_2, vec3(0.0f, -1.0f, -3.0f)) * scoreTextureMatrix;
-
-            // make opposite rotation on x -axis and flip 180 on y axis for player 2's pop ups
-            p1 = rotate(p1, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
-            p1 = rotate(p1, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
-
-            glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
-            SetUniformMat4(shaderScene, "world_matrix", p1);
-            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-
-            p2 = rotate(p2, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
-            p2 = rotate(p2, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
-
-            glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
-            SetUniformMat4(shaderScene, "world_matrix", p2);
-            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            mat4 p2_result = translate(p2_nametag, vec3(0.0f, 0.0f, 1.0f));
-            //display player 1 wins
-            if (p2Score == 5) {
-                glBindTexture(GL_TEXTURE_2D, scores[5]);
-                SetUniformMat4(shaderScene, "world_matrix", p2_result);
-                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-            //loses
-            if (p2Score == 6) {
-                glBindTexture(GL_TEXTURE_2D, scores[6]);
-                SetUniformMat4(shaderScene, "world_matrix", p2_result);
-                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-            frames++;
-            alpha++;
         }
-         
-         
-         SetUniformfValue(shaderScene, "transparency", 1.0f);
-         
+        else // Player 2 is active
+        {
+            // rotate only 90 on x axis for player 1's view of score pop up
+            p2_nametag = rotate(p2_nametag, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+            p2_nametag = rotate(p2_nametag, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
 
-        //begin drawing the skybox
-        GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
-        glUniform1i(skyboxTextures, 1);
-        glDepthFunc(GL_LEQUAL);
-        glUseProgram(shaderSkybox);
-        // set view and projection matrix
-        SetUniformMat4(shaderSkybox, "view_matrix", viewMatrix);
-        SetUniformMat4(shaderSkybox, "projection_matrix", projectionMatrix);
-        glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDepthFunc(GL_LESS);
+            glBindTexture(GL_TEXTURE_2D, playerTwoTextureID);
+            SetUniformMat4(shaderScene, "world_matrix", p2_nametag);
+            SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         if (*(playerPosition) == playerOneLoc)
         {
@@ -1994,7 +1890,7 @@ int main(int argc, char* argv[])
         }
 
         if (CheckCollision(ballLocation, playerOneLoc + playerOne.centerOfRacket))
-        {   
+        {
             float reflectedAngle = 2 * armAngles[0][1];
             xdir = cos(radians(reflectedAngle)) * -1.0f;
             zdir = sin(radians(reflectedAngle)) * 1.0f;
@@ -2002,6 +1898,7 @@ int main(int argc, char* argv[])
             currentRacket = &playerTwo;
             playerPosition = &playerTwoLoc;
             acceleration *= 1.05f;
+            playerOneActive = false;
             SoundEngine->play2D("code/assets/audio/tennisHit.mp3", false);
         }
         if (CheckCollision(ballLocation, playerTwoLoc + playerTwo.centerOfRacket))
@@ -2013,10 +1910,12 @@ int main(int argc, char* argv[])
             currentRacket = &playerOne;
             playerPosition = &playerOneLoc;
             acceleration *= 1.05f;
+            playerOneActive = true;
             SoundEngine->play2D("code/assets/audio/tennisHit.mp3", false);
         }
         if ((ballLocation.x < -35.5f) | (ballLocation.x > 35.5f))
         {
+            alpha = 1.0f;
             if (ballLocation.x < -35.5f)
             {
                 if (p2Score < 3)
@@ -2081,6 +1980,7 @@ int main(int argc, char* argv[])
                 currentRacket = &playerTwo;
                 playerPosition = &playerTwoLoc;
                 acceleration = 1.0f;
+                playerOneActive = false;
             }
             else
             {
@@ -2088,10 +1988,112 @@ int main(int argc, char* argv[])
                 currentRacket = &playerOne;
                 playerPosition = &playerOneLoc;
                 acceleration = 1.0f;
+                playerOneActive = true;
             }
             zdir = ((rand() % 10) - 5.0f) / 10;
             ballLocation = vec3(0.0f, 6.0f, 0.0f);
         }
+        if (frames < 100) {
+            if (playerOneActive)
+            {
+                SetUniformfValue(shaderScene, "transparency", alpha);
+                glBindTexture(GL_TEXTURE_2D, whiteTextureID);
+
+                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+
+                // player 1's side 
+                mat4 p1 = translate(center_1, vec3(0.0f, -1.0f, -3.0f)) * scoreTextureMatrix;
+                mat4 p2 = translate(center_1, vec3(0.0f, -1.0f, 3.0f)) * scoreTextureMatrix;
+
+                // rotate only 90 on x axis for player 1's view of score pop up
+                p1 = rotate(p1, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+
+                glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
+                SetUniformMat4(shaderScene, "world_matrix", p1);
+                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+
+                p2 = rotate(p2, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+
+                glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
+                SetUniformMat4(shaderScene, "world_matrix", p2);
+                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+
+                mat4 p1_result = translate(p1_nametag, vec3(0.0f, 0.0f, 1.0f));
+                //display player 1 wins
+                if (p1Score == 5) {
+                    glBindTexture(GL_TEXTURE_2D, scores[5]);
+                    SetUniformMat4(shaderScene, "world_matrix", p1_result);
+                    SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+                //loses
+                if (p1Score == 6) {
+                    glBindTexture(GL_TEXTURE_2D, scores[6]);
+                    SetUniformMat4(shaderScene, "world_matrix", p1_result);
+                    SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+            }
+            else
+            {
+                // now draw on other side for p2 side
+                mat4 p1 = translate(center_2, vec3(0.0f, -1.0f, 3.0f)) * scoreTextureMatrix;
+                mat4 p2 = translate(center_2, vec3(0.0f, -1.0f, -3.0f)) * scoreTextureMatrix;
+
+                // make opposite rotation on x -axis and flip 180 on y axis for player 2's pop ups
+                p1 = rotate(p1, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+                p1 = rotate(p1, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+
+                glBindTexture(GL_TEXTURE_2D, scores[p1Score]);
+                SetUniformMat4(shaderScene, "world_matrix", p1);
+                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+
+                p2 = rotate(p2, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+                p2 = rotate(p2, radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+
+                glBindTexture(GL_TEXTURE_2D, scores[p2Score]);
+                SetUniformMat4(shaderScene, "world_matrix", p2);
+                SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+
+                mat4 p2_result = translate(p2_nametag, vec3(0.0f, 0.0f, 1.0f));
+                //display player 1 wins
+                if (p2Score == 5) {
+                    glBindTexture(GL_TEXTURE_2D, scores[5]);
+                    SetUniformMat4(shaderScene, "world_matrix", p2_result);
+                    SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+                //loses
+                if (p2Score == 6) {
+                    glBindTexture(GL_TEXTURE_2D, scores[6]);
+                    SetUniformMat4(shaderScene, "world_matrix", p2_result);
+                    SetUniformVec3(shaderScene, "object_color", vec3(1.0f, 1.0f, 1.0f));
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+            }
+            frames++;
+            alpha -= 1.0f/100;
+        }
+         
+         SetUniformfValue(shaderScene, "transparency", 1.0f);
+         
+        //begin drawing the skybox
+        GLuint skyboxTextures = glGetUniformLocation(shaderSkybox, "skybox");
+        glUniform1i(skyboxTextures, 1);
+        glDepthFunc(GL_LEQUAL);
+        glUseProgram(shaderSkybox);
+        // set view and projection matrix
+        SetUniformMat4(shaderSkybox, "view_matrix", viewMatrix);
+        SetUniformMat4(shaderSkybox, "projection_matrix", projectionMatrix);
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthFunc(GL_LESS);
 
         // End Frame
         glfwSwapBuffers(window);
@@ -2328,16 +2330,16 @@ int main(int argc, char* argv[])
 
         if (previousMstate == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) // M - Toggle z spotlight
         {
-            glGetUniformiv(shaderScene, zSpotlightFlag, currentZSpotlightValue);
-            if (currentZSpotlightValue[0] == 1)
+            glGetUniformiv(shaderScene, ballSpotlightFlag, currentBallSpotlightValue);
+            if (currentBallSpotlightValue[0] == 1)
             {
                 glUseProgram(shaderScene);
-                glUniform1i(zSpotlightFlag, 0);
+                glUniform1i(ballSpotlightFlag, 0);
             }
             else
             {
                 glUseProgram(shaderScene);
-                glUniform1i(zSpotlightFlag, 1); 
+                glUniform1i(ballSpotlightFlag, 1); 
             }
         }
         previousMstate = glfwGetKey(window, GLFW_KEY_M);
@@ -2463,6 +2465,14 @@ int main(int argc, char* argv[])
                 FOV = 71.8f;
             }
         }
+
+        /*
+        if (p1Score > 4) // if one side has won, enter an infinite loop until R is pressed to start again.
+        {
+            p1Score = 0;
+            p2Score = 0;
+        }*/
+
         glfwGetCursorPos(window, &lastMousePosX, &lastMousePosY);
         if (sideCamera) 
         { }

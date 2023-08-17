@@ -7,13 +7,16 @@ uniform int numberOfSpotlights;
 uniform vec3 light_color;
 uniform vec3 pointLight_Pos;
 
-uniform vec3 zSpotLight_pos;
-uniform vec3 zSpotLight_dir;
-uniform vec3 zSpotLight_color;
+uniform vec3 ballSpotLight_pos;
+uniform vec3 ballSpotLight_dir;
+uniform vec3 ballSpotLight_color;
 
-uniform vec3 ySpotLight_pos;
-uniform vec3 ySpotLight_dir;
-uniform vec3 ySpotLight_color;
+uniform vec3 y1SpotLight_pos;
+uniform vec3 y1SpotLight_dir;
+uniform vec3 y1SpotLight_color;
+uniform vec3 y2SpotLight_pos;
+uniform vec3 y2SpotLight_dir;
+uniform vec3 y2SpotLight_color;
 
 uniform vec3 object_color;
 
@@ -44,7 +47,7 @@ uniform sampler2D textureSampler;
 uniform int useTexture = 1;
 uniform int useColor = 0;
 uniform int useShadow = 0;
-uniform int useSpotlightZ = 0;
+uniform int useSpotlightBall = 0;
 uniform int useSpotlightY = 0;
 
 uniform float transparency = 1.0f;
@@ -143,13 +146,14 @@ void main()
 	light += calcSpotLight(vec3(30.0f, 16.0f, 0.0f), normalize(vec3(0.5f, 16.0f, 0.0f) - vec3(30.0f, 16.0f, 0.0f)), norm, fragment_position, viewDir, vec3(1.0f, 1.0f, 1.0f));
 	
 	// Then the spotlights
-	if (useSpotlightZ == 1)
+	if (useSpotlightBall == 1)
 	{
-		light += calcSpotLight(zSpotLight_pos, zSpotLight_dir, norm, fragment_position, viewDir, zSpotLight_color);
+		light += calcSpotLight(ballSpotLight_pos, ballSpotLight_dir, norm, fragment_position, viewDir, ballSpotLight_color);
 	}
 	if (useSpotlightY == 1)
 	{
-		light += calcSpotLight(ySpotLight_pos, ySpotLight_dir, norm, fragment_position, viewDir, ySpotLight_color);
+		light += calcSpotLight(y1SpotLight_pos, y1SpotLight_dir, norm, fragment_position, viewDir, y1SpotLight_color);
+		light += calcSpotLight(y2SpotLight_pos, y2SpotLight_dir, norm, fragment_position, viewDir, y2SpotLight_color);
 	}
     
 	if (useTexture == 0)
